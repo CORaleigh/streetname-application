@@ -6,6 +6,9 @@ const Navigation: React.FC<NavigationProps> = ({ user }) => {
     <calcite-navigation slot="header">
       <calcite-navigation-logo
         slot="logo"
+        thumbnail="./assets/logo.svg"
+        href="https://raleighnc.gov"
+        target="_blank"
         heading="Street Name Application"
       ></calcite-navigation-logo>
       {user && (
