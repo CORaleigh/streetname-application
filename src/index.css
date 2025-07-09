@@ -1,0 +1,141 @@
+/* Include calcite, core API and SDK component CSS */
+@import "https://js.arcgis.com/calcite-components/3.2.1/calcite.css";
+@import "https://js.arcgis.com/4.33/@arcgis/core/assets/esri/themes/light/main.css";
+@import "https://js.arcgis.com/4.33/map-components/main.css";
+
+#root,
+html,
+body {
+  height: 100%;
+  margin: 0;
+  --calcite-panel-space: 30px;
+  --calcite-color-brand: #4d8c2b;
+  --calcite-color-brand-hover: #4d8c2b;
+  --calcite-color-brand-press: #4d8c2b;
+  --calcite-color-focus-color: none !important;
+}
+
+.warning-message {
+  --calcite-input-message-icon-color: var(--calcite-color-status-warning);
+}
+arcgis-map {
+  height: 100%;
+  width: 100%;
+}
+
+calcite-panel {
+  min-height: calc(100vh - 190px);
+  max-height: calc(100vh - 190px);
+}
+
+#review calcite-panel {
+  min-height: calc(100vh - 60px);
+  max-height: calc(100vh - 60px);
+}
+
+calcite-stepper {
+  padding: 10px;
+}
+
+.street-inputs {
+  display: flex;
+}
+
+.street-inputs calcite-label {
+  flex: 3;
+  padding-right: 1em;
+}
+.street-inputs calcite-select {
+  flex: 1;
+}
+
+.street-inputs .street-name {
+  flex: 3;
+  padding-right: 1em;
+  align-content: center;
+}
+.street-inputs .street-type {
+  flex: 1;
+  align-content: center;
+}
+.street-inputs .comments {
+  flex: 3;
+}
+
+.street-inputs .street-name-header {
+  flex: 3;
+  padding-right: 1em;
+}
+.street-inputs .street-type-header {
+  flex: 1;
+}
+.street-inputs .street-comments-header {
+  flex: 3;
+}
+
+calcite-fab {
+  margin-top: 1em;
+  max-width: 150px;
+}
+
+.approved {
+  --calcite-chip-background-color: var(--calcite-color-status-success);
+  --calcite-chip-icon-color: white;
+  --calcite-chip-text-color: white;
+}
+
+.rejected {
+  --calcite-chip-background-color: var(--calcite-color-status-danger);
+  --calcite-chip-icon-color: white;
+  --calcite-chip-text-color: white;
+}
+
+.action-column {
+  width: 50px;
+}
+
+calcite-chip-group {
+  max-width: 100px;
+}
+
+.notice-content {
+  width: 100vw;
+}
+
+calcite-input-text {
+  min-width: 200px;
+}
+
+calcite-select {
+  min-width: 100px;
+}
+
+@media (max-width: 600px) {
+  #review {
+    --calcite-panel-space: 0px;
+  }
+}
+
+calcite-action-bar {
+  max-width: 50px;
+}
+
+.details-container {
+  display: flex;
+  max-height: 600px;
+  flex-direction: row;
+}
+
+.details-container arcgis-map{
+  height: auto;
+  flex: 1;
+}
+
+.details-container calcite-table {
+  flex: 1;
+}
+
+
+calcite-panel calcite-button {
+  max-width: 300px;
+}
