@@ -35,7 +35,7 @@ const FormInputs = forwardRef<FormInputsRef, FormInputsProps>(
                 <calcite-input-number
                   name={formField.name}
                   scale="l"
-                  value={graphic?.getAttribute(formField.name)}
+                  value={graphic?.getAttribute(formField.name).toString()}
                   required={formField.required ? true : undefined}
                   validationMessage={formField.message}
                   validationIcon="exclamation-mark-circle-f"
@@ -63,7 +63,7 @@ const FormInputs = forwardRef<FormInputsRef, FormInputsProps>(
                   oncalciteInputTextInput={(
                     event: TargetedEvent<HTMLCalciteInputTextElement, void>
                   ) => {
-                    checkInput(event.target, formField);
+                    checkInput(event.currentTarget, formField);
                   }}
                 ></calcite-input-text>
               )}

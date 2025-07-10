@@ -10,7 +10,11 @@ interface UseFormInputOptions {
   ref: React.ForwardedRef<FormInputsRef>;
 }
 
-const useFormInput = ({ fields, setFields, ref }: UseFormInputOptions) => {
+const useFormInput = ({
+  fields,
+  setFields,
+  ref,
+}: UseFormInputOptions) => {
   const { graphic, setGraphic } = useStreetNameAppContext();
 
   const checkInput = useCallback(
@@ -19,20 +23,10 @@ const useFormInput = ({ fields, setFields, ref }: UseFormInputOptions) => {
       formField: FormField
     ) => {
       if (!graphic) return;
-
-      const status =
-        (element.required && element.value.length === 0) ||
-        ((element.required || element.value.length > 0) &&
-          formField.pattern &&
-          !element.value.match(formField.pattern))
-          ? "invalid"
-          : "valid";
-      const message =
-        element.required && element.value.length === 0
-          ? "field is required"
-          : formField.pattern && !element.value.match(formField.pattern)
-          ? formField.patternMessage
-          : undefined;
+      const input = element.shadowRoot?.querySelector("input");
+      const status = input?.checkValidity() ? "valid" : "invalid";
+      const message = input?.validity.patternMismatch ? formField.patternMessage : status === 'invalid' ? input?.validationMessage : undefined;
+      
       setFields((prevFields) =>
         prevFields.map((f) =>
           f.name === formField.name

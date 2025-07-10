@@ -110,6 +110,20 @@ calcite-input-text {
 calcite-select {
   min-width: 100px;
 }
+.details-container {
+  display: flex;
+  max-height: 600px;
+  flex-direction: row;
+}
+
+.details-container arcgis-map {
+  height: auto;
+  flex: 1;
+}
+
+.details-container calcite-table {
+  flex: 1;
+}
 
 @media (max-width: 476px) {
   calcite-panel {
@@ -125,26 +139,17 @@ calcite-select {
   #streetname-panel {
     min-height: calc(600px);
   }
+  .details-container {
+  height: 800px;
+  max-height: 800px;
+  flex-direction: column !important;
+}
 }
 
 calcite-action-bar {
   max-width: 50px;
 }
 
-.details-container {
-  display: flex;
-  max-height: 600px;
-  flex-direction: row;
-}
-
-.details-container arcgis-map {
-  height: auto;
-  flex: 1;
-}
-
-.details-container calcite-table {
-  flex: 1;
-}
 
 calcite-panel calcite-button {
   max-width: 300px;

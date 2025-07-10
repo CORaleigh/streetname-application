@@ -31,6 +31,7 @@ const Location: React.FC<LocationProps> = ({
     handleNextClick,
     jurisdictionLink,
   } = useLocation({ onNext, onValid });
+
   return (
     <calcite-panel id="location-panel">
       <calcite-notice
@@ -46,7 +47,6 @@ const Location: React.FC<LocationProps> = ({
         }
       >
         <div slot="title">
-
           {!graphic?.geometry
             ? "Location has not been set"
             : !inEtj
@@ -72,7 +72,7 @@ const Location: React.FC<LocationProps> = ({
         onarcgisViewLayerviewCreate={layerViewCreated}
         onarcgisViewClick={mapViewClicked}
         popupDisabled
-      >
+        >
         <arcgis-search
           position="top-left"
           includeDefaultSourcesDisabled

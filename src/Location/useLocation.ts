@@ -192,7 +192,7 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
     if (!graphic || !arcgisMap.current) return;
     graphic.symbol = {
       type: "picture-marker",
-      url: "../assets/pin.svg",
+      url: "./assets/pin.svg",
       height: 24,
       width: 24,
       yoffset: 12,

@@ -70,19 +70,17 @@ export const config: Config = {
       },
       {
         name: "email",
-        pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}",
+        pattern:"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
         patternMessage: "not a valid email address",
         value: "test@test.com",
         required: true,
         status: "idle",
-        type: "email",
       },
       {
         name: "phone",
         value: "",
         required: true,
         status: "idle",
-        type: "tel",
       },
     ],
     details: [
@@ -125,7 +123,7 @@ export const config: Config = {
       },
       {
         name: "streetnamesneeded",
-        value: "2",
+        value: "",
         required: true,
         status: "idle",
       },

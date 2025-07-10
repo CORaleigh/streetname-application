@@ -22,33 +22,39 @@ const Contact: React.FC<ContactProps> = ({
   const { inputRef, fieldsLoaded, fields, setFields } = useContact({
     formFields,
     layer,
-    onValid,
+    onValid
   });
   return (
     <calcite-panel>
-      {fieldsLoaded && (
-        <FormInputs ref={inputRef} fields={fields} setFields={setFields} />
-      )}
-      <calcite-button
-        scale="l"
-        slot="footer-start"
-        iconStart="chevron-left"
-        onClick={() => onPrevious("intro")}
-      >
-        Previous
-      </calcite-button>
-      <calcite-button
-        scale="l"
-        slot="footer-end"
-        iconEnd="chevron-right"
-        onClick={() => {
-          if (inputRef.current?.checkAllInputs()) {
-            onNext("location");
-          }
-        }}
-      >
-        Next
-      </calcite-button>
+      {/* <form onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        
+      }}> */}
+        {fieldsLoaded && (
+          <FormInputs ref={inputRef} fields={fields} setFields={setFields} />
+        )}
+        <calcite-button
+          scale="l"
+          slot="footer-start"
+          iconStart="chevron-left"
+          onClick={() => onPrevious("intro")}
+        >
+          Previous
+        </calcite-button>
+        <calcite-button
+          scale="l"
+          type="submit"
+          slot="footer-end"
+          iconEnd="chevron-right"
+          onClick={() => {
+            if (inputRef.current?.checkAllInputs()) {
+              onNext("location");
+            }
+          }}
+        >
+          Next
+        </calcite-button>
+      {/* </form> */}
     </calcite-panel>
   );
 };

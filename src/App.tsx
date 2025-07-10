@@ -4,7 +4,6 @@ import Form from "./Form/Form";
 import Status from "./Status/Status";
 import Review from "./Review/Review";
 import { StreetNameAppContextProvider } from "./Context/StreetNameAppContextProvider";
-import { useStreetNameAppContext } from "./Context/useStreetNameAppContext";
 import "@esri/calcite-components/components/calcite-shell";
 import "@esri/calcite-components/components/calcite-panel";
 import "@esri/calcite-components/components/calcite-navigation";
@@ -32,16 +31,16 @@ import "@esri/calcite-components/components/calcite-table-row";
 import "@esri/calcite-components/components/calcite-table-cell";
 import "@esri/calcite-components/components/calcite-table-header";
 
-const TestContext = () => {
-  const ctx = useStreetNameAppContext();
-  console.log("✅ Context inside <TestContext />", ctx);
-  return null;
-};
+// const TestContext = () => {
+//   const ctx = useStreetNameAppContext();
+//   console.log("✅ Context inside <TestContext />", ctx);
+//   return null;
+// };
 function App() {
   return (
     <BrowserRouter basename="/streetname-application">
       <StreetNameAppContextProvider>
-        <TestContext />
+        {/* <TestContext /> */}
         <Routes>
           <Route path="/submit" element={<Form />} />
           <Route path="/status" element={<Navigate to="/submit" replace />} />
