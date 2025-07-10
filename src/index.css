@@ -41,11 +41,11 @@ calcite-stepper {
   display: flex;
 }
 
-.street-inputs calcite-label {
+.street-inputs .street-name-label {
   flex: 3;
   padding-right: 1em;
 }
-.street-inputs calcite-select {
+.street-inputs .street-type-label {
   flex: 1;
 }
 
@@ -64,7 +64,8 @@ calcite-stepper {
 
 .street-inputs .street-name-header {
   flex: 3;
-  padding-right: 1em;
+  padding-left: 2em;
+
 }
 .street-inputs .street-type-header {
   flex: 1;
@@ -110,9 +111,19 @@ calcite-select {
   min-width: 100px;
 }
 
-@media (max-width: 600px) {
-  #review {
+@media (max-width: 476px) {
+  calcite-panel {
     --calcite-panel-space: 0px;
+    --calcite-internal-panel-default-space: 10px;
+    min-height: auto;
+    max-height: auto;
+  }
+  #location-panel {
+    min-height: calc(600px);
+    max-height: calc(600px);
+  }
+  #streetname-panel {
+    min-height: calc(600px);
   }
 }
 
@@ -126,7 +137,7 @@ calcite-action-bar {
   flex-direction: row;
 }
 
-.details-container arcgis-map{
+.details-container arcgis-map {
   height: auto;
   flex: 1;
 }
@@ -134,7 +145,6 @@ calcite-action-bar {
 .details-container calcite-table {
   flex: 1;
 }
-
 
 calcite-panel calcite-button {
   max-width: 300px;

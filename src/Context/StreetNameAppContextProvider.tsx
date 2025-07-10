@@ -5,12 +5,14 @@ import type { StreetName } from "../types/types/types";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { config } from "../config";
 import Graphic from "@arcgis/core/Graphic";
+import { useLocation } from "react-router-dom";
 
 export const StreetNameAppContextProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
+  const location = useLocation();
   const [loaded, setLoaded] = useState<boolean>(false);
   const [graphic, setGraphic] = useState<__esri.Graphic | undefined>(new Graphic({attributes:{}}));
   const [streetNames, setStreetNames] = useState<StreetName[]>([]);
@@ -18,8 +20,6 @@ export const StreetNameAppContextProvider = ({
   const [streetNameGraphics, setStreetNameGraphics] = useState<
     __esri.Graphic[]
   >([]);
-
-  
   const isAdminRoute =
     location.pathname.includes("/review/");
   const applicationLayer = useMemo(
@@ -83,7 +83,8 @@ export const StreetNameAppContextProvider = ({
         streetsTable,
         streetsLookupTable,
         loaded,
-        sendEmail
+        sendEmail,
+        currentPath: location.pathname 
       }}
     >
       {children}

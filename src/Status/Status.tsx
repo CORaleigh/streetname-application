@@ -29,7 +29,7 @@ function Status() {
     notice,
     handleAdditionalStreetsClicked,
     showStreetsForm,
-    handleStreetsDialogClose
+    handleStreetsDialogClose,
   } = useStatus({
     setStreetNames,
     streetNameGraphics,
@@ -46,7 +46,22 @@ function Status() {
       <Navigation></Navigation>
 
       {notice && (
-        <calcite-notice open width="full" kind={notice.kind} icon={notice.kind === 'danger' ? 'exclamation-mark-circle-f' : notice.kind === 'warning' ? 'exclamation-mark-triangle-f' : notice.kind === 'info' ? 'information' : notice.kind === 'success' ? 'check' : undefined}>
+        <calcite-notice
+          open
+          width="full"
+          kind={notice.kind}
+          icon={
+            notice.kind === "danger"
+              ? "exclamation-mark-circle-f"
+              : notice.kind === "warning"
+              ? "exclamation-mark-triangle-f"
+              : notice.kind === "info"
+              ? "information"
+              : notice.kind === "success"
+              ? "check"
+              : undefined
+          }
+        >
           <div slot="title">{notice.heading}</div>
 
           <div slot="message">{notice.message}</div>
@@ -81,7 +96,6 @@ function Status() {
           allowedStreetTypes={config.allowedStreetTypes}
         ></StreetNames>
       </calcite-dialog>
-
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { StreetName, Validity } from "../types/types/types";
 import { getFromIndexedDB, openStreetDB, setInIndexedDB } from "./streetsdb";
 import { streetsSoundSimilar } from "./checkSound";
@@ -39,7 +39,38 @@ const useStreetNames = ({
   const [showAdditionalStreetsAdded, setShowAdditionalStreetsAdded] =
     useState<boolean>(false);
 
+  const directions = useMemo(
+    () => [
+      "NORTH",
+      "SOUTH",
+      "EAST",
+      "WEST",
+      "NORTHEAST",
+      "NORTHWEST",
+      "SOUTHEAST",
+      "SOUTHWEST",
+    ],
+    []
+  );
 
+    const typesNotAllowedInName = useMemo(
+    () => [
+      "STREET",
+      "BOULEVARD",
+      "CIRCLE",
+      "COURT",
+      "CRESCENT",
+      "DRIVE",
+      "LANE",
+      "LOOP",
+      "PATH",
+      "PLACE",
+      "ROAD",
+      "TRAIL",
+      "WAY"
+    ],
+    []
+  );
 
   useEffect(() => {
     const isStatus = location.pathname.includes("/status/");
@@ -107,7 +138,10 @@ const useStreetNames = ({
         }
       }
       const existingStreet = existingStreets.find(
-        (street: string) => street.toUpperCase() === name.toUpperCase().trim()
+        (street: string) =>
+          street.toUpperCase() === name.toUpperCase().trim() ||
+          street.toUpperCase().replaceAll(" ", "") ===
+            name.toUpperCase().replaceAll(" ", "")
       );
       if (existingStreet) {
         const result = await streetsLookupTable?.queryFeatures({
@@ -146,10 +180,41 @@ const useStreetNames = ({
           typeValid: type !== "",
         } as Validity;
       }
+      if (!/^[a-zA-Z]+$/.test(name)) {
+        return {
+          status: "invalid",
+          message: "Street name must only contain letters",
+          nameValid: false,
+          typeValid: type !== "",
+        } as Validity;
+      }
+
+      directions.forEach((direction) => {
+        if (name.toUpperCase().startsWith(direction)) {
+          return {
+            status: "invalid",
+            message: "Street name cannot contain a direction",
+            nameValid: false,
+            typeValid: type !== "",
+          } as Validity;
+        }
+      });
+
+      typesNotAllowedInName.forEach((type) => {
+        if (name.toUpperCase().startsWith(type+" ") || name.toUpperCase().endsWith(" "+type)) {
+          return {
+            status: "invalid",
+            message: "Street name cannot contain a street type",
+            nameValid: false,
+            typeValid: type !== "",
+          } as Validity;
+        }
+      });      
+
       if (name.length < 3)
         return {
           status: "invalid",
-          message: "Street name must be at least two characters",
+          message: "Street name must be at least three characters",
           nameValid: false,
           typeValid: type !== "",
         } as Validity;
@@ -187,7 +252,7 @@ const useStreetNames = ({
         typeValid: true,
       } as Validity;
     },
-    [existingStreets, streetNameGraphics, streetNames, streetsLookupTable]
+    [directions, existingStreets, streetNameGraphics, streetNames, streetsLookupTable, typesNotAllowedInName]
   );
 
   useEffect(() => {

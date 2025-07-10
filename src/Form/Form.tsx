@@ -1,32 +1,3 @@
-import "@esri/calcite-components/components/calcite-shell";
-import "@esri/calcite-components/components/calcite-panel";
-
-import "@esri/calcite-components/components/calcite-navigation";
-import "@esri/calcite-components/components/calcite-navigation-logo";
-import "@esri/calcite-components/components/calcite-navigation-user";
-import "@esri/calcite-components/components/calcite-stepper";
-import "@esri/calcite-components/components/calcite-stepper-item";
-import "@esri/calcite-components/components/calcite-scrim";
-import "@esri/calcite-components/components/calcite-label";
-import "@esri/calcite-components/components/calcite-input";
-import "@esri/calcite-components/components/calcite-dialog";
-
-import "@esri/calcite-components/components/calcite-input-text";
-import "@esri/calcite-components/components/calcite-input-number";
-import "@esri/calcite-components/components/calcite-text-area";
-import "@esri/calcite-components/components/calcite-notice";
-import "@esri/calcite-components/components/calcite-list";
-import "@esri/calcite-components/components/calcite-list-item";
-import "@esri/calcite-components/components/calcite-action";
-import "@esri/calcite-components/components/calcite-select";
-import "@esri/calcite-components/components/calcite-option";
-import "@esri/calcite-components/components/calcite-fab";
-import "@esri/calcite-components/components/calcite-input-message";
-import "@esri/calcite-components/components/calcite-table";
-import "@esri/calcite-components/components/calcite-table-row";
-import "@esri/calcite-components/components/calcite-table-cell";
-import "@esri/calcite-components/components/calcite-table-header";
-
 import Contact from "../Contact/Contact";
 import { config } from "../config";
 import Details from "../Details/Details";
@@ -38,6 +9,7 @@ import StreetNames from "../StreetNames/StreetNames";
 import useForm from "./useForm";
 import Navigation from "../Navigation/Navigation";
 import { useStreetNameAppContext } from "../Context/useStreetNameAppContext";
+import { useCalciteBreakpoint } from "../useCalciteBreakpoints";
 
 function Form() {
   const { applicationLayer, streetsTable, streetsLookupTable, loaded } =
@@ -50,15 +22,15 @@ function Form() {
     onSuccess,
     submissionId,
   } = useForm();
-  
+  const breakpoint = useCalciteBreakpoint();
   if (!loaded) {
     return <calcite-scrim loading></calcite-scrim>;
   }
   return (
     <>
-
       <Navigation></Navigation>
       <calcite-stepper
+        layout={breakpoint === 'xs' || breakpoint === 'xxs' ? 'vertical' : 'horizontal' }
         oncalciteStepperChange={(
           event: TargetedEvent<HTMLCalciteStepperElement, void>
         ) => {
@@ -169,7 +141,9 @@ function Form() {
         open={submissionId.length > 0}
         heading="Submission Successful"
         modal
-        oncalciteDialogClose={() => location.href = `${document.location.origin}/streetname-application/${submissionId}`}
+        oncalciteDialogClose={() =>
+          (location.href = `${document.location.origin}/streetname-application/${submissionId}`)
+        }
       >
         Your application has successfully been submitted. Staff will begin
         reviewing the application. If not enough street names are approved, you

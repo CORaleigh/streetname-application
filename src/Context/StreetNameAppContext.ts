@@ -17,6 +17,7 @@ export type StreetNameAppContextType = {
   streetsLookupTable: FeatureLayer;
   loaded: boolean;
   sendEmail: (url: string, applicationId: string) => void;
+  currentPath: string;
 };
 
 // Create context with undefined default for safety check in hook

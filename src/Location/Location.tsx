@@ -32,7 +32,7 @@ const Location: React.FC<LocationProps> = ({
     jurisdictionLink,
   } = useLocation({ onNext, onValid });
   return (
-    <calcite-panel>
+    <calcite-panel id="location-panel">
       <calcite-notice
         open
         width="full"

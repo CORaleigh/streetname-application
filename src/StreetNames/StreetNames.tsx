@@ -38,19 +38,7 @@ const StreetNames: React.FC<StreetNamesProps> = ({
 
   return (
     <>
-      <calcite-panel>
-        <calcite-notice icon="information" open kind="info" closable>
-        
-          <div slot="message">
-            While entering street names it will automatically check to see if
-            the street name already exists in the county, it will also check to
-            see if the street name sounds similar to another existing street.
-            You will not be able to submit street names that already exist,
-            however, if it thingk the street name is similar to another, you
-            will see a warning, but can still submit if you don't agree.
-          </div>
-        </calcite-notice>
-        <p/>
+      <calcite-panel id="streetname-panel">
         {validStreetsCount < minStreetNameCount && (
           <calcite-notice
             open
@@ -85,18 +73,18 @@ const StreetNames: React.FC<StreetNamesProps> = ({
             dragEnabled
             oncalciteListOrderChange={handleListOrderChange}
           >
-            <calcite-list-item dragDisabled disabled>
+            {/* <calcite-list-item dragDisabled disabled>
               <div slot="content">
                 <div className="street-inputs">
                   <div className="street-name-header">
-                    <h3>Street Name</h3>
+                    <calcite-label>Street Name</calcite-label>
                   </div>
                   <div className="street-type-header">
-                    <h3>Street Type</h3>
+                    <calcite-label>Street Type</calcite-label>
                   </div>
                 </div>
               </div>
-            </calcite-list-item>
+            </calcite-list-item> */}
             {streetNames
               .sort((a, b) => a.order - b.order)
               .map((street: StreetName, i: number) => (
@@ -107,7 +95,8 @@ const StreetNames: React.FC<StreetNamesProps> = ({
 
                   <div slot="content">
                     <div className="street-inputs">
-                      <calcite-label>
+                      <calcite-label className="street-name-label">
+                        Street Name
                         <calcite-input-text
                           scale="l"
                           value={street.streetname}
@@ -129,24 +118,27 @@ const StreetNames: React.FC<StreetNamesProps> = ({
                             </calcite-input-message>
                           )}
                       </calcite-label>
-                      <calcite-select
-                        scale="l"
-                        label={"street type"}
-                        value={street.streettype}
-                        status={street.typeValid ? "valid" : "invalid"}
-                        validationMessage="required"
-                        validationIcon="exclamation-mark-circle-f"
-                        oncalciteSelectChange={async (
-                          e: TargetedEvent<HTMLCalciteSelectElement, void>
-                        ) => handleStreetTypeSelect(e.target, street, i)}
-                      >
-                        <calcite-option value=""> </calcite-option>
-                        {allowedStreetTypes.map((streetType: string) => (
-                          <calcite-option key={streetType} value={streetType}>
-                            {streetType}
-                          </calcite-option>
-                        ))}
-                      </calcite-select>
+                      <calcite-label className="street-type-label">
+                        Street Type
+                        <calcite-select
+                          scale="l"
+                          label={"street type"}
+                          value={street.streettype}
+                          status={street.typeValid ? "valid" : "invalid"}
+                          validationMessage="required"
+                          validationIcon="exclamation-mark-circle-f"
+                          oncalciteSelectChange={async (
+                            e: TargetedEvent<HTMLCalciteSelectElement, void>
+                          ) => handleStreetTypeSelect(e.target, street, i)}
+                        >
+                          <calcite-option value=""> </calcite-option>
+                          {allowedStreetTypes.map((streetType: string) => (
+                            <calcite-option key={streetType} value={streetType}>
+                              {streetType}
+                            </calcite-option>
+                          ))}
+                        </calcite-select>
+                      </calcite-label>
                     </div>
                   </div>
                   <div slot="actions-end">
@@ -190,7 +182,7 @@ const StreetNames: React.FC<StreetNamesProps> = ({
             Next
           </calcite-button>
         )}
-        {onNext && (
+        {/* {onNext && (
           <calcite-button
             disabled={validStreetsCount < minStreetNameCount ? true : undefined}
             scale="l"
@@ -200,7 +192,7 @@ const StreetNames: React.FC<StreetNamesProps> = ({
           >
             Submit
           </calcite-button>
-        )}
+        )} */}
         {!onNext && (
           <calcite-button
             disabled={

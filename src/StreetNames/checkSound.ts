@@ -1,44 +1,47 @@
 import doubleMetaphone from 'talisman/phonetics/double-metaphone';
 import levenshtein from 'talisman/metrics/levenshtein';
 
-// Type for phonetic code tuple
 type PhoneticCode = [string, string | null];
 
-// Get phonetic codes for a single word
 const getCodes = (word: string): PhoneticCode => doubleMetaphone(word);
 
-// Get phonetic codes for all words in a street name
 const getPhoneticWords = (name: string): PhoneticCode[] =>
-  name.toLowerCase().split(/\s+/).map(getCodes);
+  name.trim().toLowerCase().split(/\s+/).map(getCodes);
 
-// Check if two phonetic codes match
 const codesMatch = (code1: PhoneticCode, code2: PhoneticCode): boolean =>
-  code1[0] === code2[0] ||
-  code1[0] === code2[1] ||
-  code1[1] === code2[0] ||
-  code1[1] === code2[1];
+  code1.some(c1 => c1 && code2.includes(c1));
 
-// Main function: check if two street names sound similar
+// Collapse into a single string for comparison
+const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
+
 export const streetsSoundSimilar = (
   name1: string,
   name2: string,
-  wordMatchThreshold = .1,
-  maxEditDistance = 1
+  wordMatchThreshold = 0.5
 ): boolean => {
-    
-  if (name1.split(' ').length > 1 || name2.split(' ').length > 1) {
-    maxEditDistance = 2;
-  }
-  const words1 = getPhoneticWords(name1);
-  const words2 = getPhoneticWords(name2);
+  const normalized1 = name1.trim().toLowerCase();
+  const normalized2 = name2.trim().toLowerCase();
+
+  const joined1 = normalize(name1);
+  const joined2 = normalize(name2);
+
+  const editDistance = levenshtein(joined1, joined2);
+  const normalizedDistance = editDistance / Math.max(joined1.length, joined2.length);
+
+  // Phonetic word-by-word comparison
+  const words1 = getPhoneticWords(normalized1);
+  const words2 = getPhoneticWords(normalized2);
+
   const matchedWords = words1.filter(code1 =>
     words2.some(code2 => codesMatch(code1, code2))
   ).length;
 
-  const longerLength = Math.max(words1.length, words2.length);
-  const matchRatio = matchedWords / longerLength;
+  const matchRatio = matchedWords / Math.max(words1.length, words2.length);
 
-  const editDistance = levenshtein(name1.toLowerCase(), name2.toLowerCase());
+  // First word stronger match check
+  const firstWord1 = getCodes(normalized1.split(/\s+/)[0]);
+  const firstWord2 = getCodes(normalized2.split(/\s+/)[0]);
+  const firstWordsSimilar = codesMatch(firstWord1, firstWord2);
 
-  return matchRatio >= wordMatchThreshold && editDistance <= maxEditDistance;
+  return firstWordsSimilar && matchRatio >= wordMatchThreshold && normalizedDistance <= 0.25;
 };
