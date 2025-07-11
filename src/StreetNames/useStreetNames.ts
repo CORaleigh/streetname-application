@@ -544,7 +544,7 @@ const useStreetNames = ({
         const listItems = Array.from(
           event.target.querySelectorAll("calcite-list-item")
         );
-
+        
         const reordered = listItems
           .map((el, newIndex) => {
             const id = el.id;
@@ -553,7 +553,7 @@ const useStreetNames = ({
 
             return {
               ...item,
-              order: newIndex + maxOrder,
+              order: newIndex + maxOrder + 1,
             };
           })
           .filter((item): item is StreetName => item !== null);
