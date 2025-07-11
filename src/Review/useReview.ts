@@ -277,6 +277,7 @@ const useReview = ({
         "status",
         `${org === "city" ? "City" : org === "county" ? "County" : ""} Rejected`
       );
+      
       sendEmail(config.flows.rejected, graphic.getAttribute("GlobalID"));
       setDialog({
         open: true,

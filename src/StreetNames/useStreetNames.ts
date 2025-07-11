@@ -180,7 +180,7 @@ const useStreetNames = ({
           typeValid: type !== "",
         } as Validity;
       }
-      if (!/^[a-zA-Z]+$/.test(name)) {
+      if (!/^[a-zA-Z\s]+$/.test(name)) {
         return {
           status: "invalid",
           message: "Street name must only contain letters",
@@ -455,7 +455,7 @@ const useStreetNames = ({
             nameValid: false,
             typeValid: false,
             id: crypto.randomUUID(),
-            order: 1
+            order: 1,
           });
         }
 
@@ -544,7 +544,7 @@ const useStreetNames = ({
         const listItems = Array.from(
           event.target.querySelectorAll("calcite-list-item")
         );
-        
+
         const reordered = listItems
           .map((el, newIndex) => {
             const id = el.id;

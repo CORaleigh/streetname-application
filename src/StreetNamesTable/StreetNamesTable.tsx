@@ -73,7 +73,7 @@ const StreetNamesTable: React.FC<StreetNamesTableProps> = ({
               (streetNameGraphics.filter(
                 (streetNameGraphic: __esri.Graphic) =>
                   streetNameGraphic.getAttribute("countyapproved") === "Yes"
-              ).length >= graphic?.getAttribute("streetnamesneeded")) || streetName.getAttribute("cityapproved") === "No" || graphic?.getAttribute('status') === 'Approved'
+              ).length >= graphic?.getAttribute("streetnamesneeded")) || (org === "county" && streetName.getAttribute("cityapproved") === "No") || graphic?.getAttribute('status') === 'Approved'
                 ? true
                 : undefined 
             }
