@@ -126,6 +126,9 @@ calcite-select {
 }
 
 @media (max-width: 476px) {
+  .street-inputs {
+    flex-direction: column;
+  }
   calcite-panel {
     --calcite-panel-space: 0px;
     --calcite-internal-panel-default-space: 10px;
