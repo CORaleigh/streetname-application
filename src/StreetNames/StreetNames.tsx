@@ -127,6 +127,7 @@ const StreetNames: React.FC<StreetNamesProps> = ({
                           status={street.typeValid ? "valid" : "invalid"}
                           validationMessage="required"
                           validationIcon="exclamation-mark-circle-f"
+                          placeholder="Select type"
                           oncalciteSelectChange={async (
                             e: TargetedEvent<HTMLCalciteSelectElement, void>
                           ) => handleStreetTypeSelect(e.target, street, i)}

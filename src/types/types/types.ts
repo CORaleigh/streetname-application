@@ -28,6 +28,7 @@ export type FormField = {
   field?: __esri.Field | undefined;
   message?: string;
   type?: "tel" | "email";
+  placeholder?: string;
 };
 export type Config = {
   formLayerId: string;

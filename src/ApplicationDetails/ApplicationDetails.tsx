@@ -29,7 +29,7 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
         description="application details"
         expanded={expanded}
       >
-        { loaded &&  <div className="details-container">
+        { loaded && graphic && graphic.attributes && <div className="details-container">
          <calcite-table caption={"Details"} striped>
             <calcite-table-row>
               <calcite-table-header heading="Field"></calcite-table-header>

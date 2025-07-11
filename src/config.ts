@@ -61,6 +61,7 @@ export const config: Config = {
         value: "test",
         required: true,
         status: "idle",
+        placeholder: "First Last",
       },
       {
         name: "organization",
@@ -72,17 +73,19 @@ export const config: Config = {
         name: "email",
         pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
         patternMessage: "not a valid email address",
-        value: "test@test.com",
+        value: "",
         required: true,
         status: "idle",
+        placeholder: "name@domain.com",
       },
       {
         name: "phone",
         pattern: "^\\(?\\d{3}\\)?[.\\- ]?\\d{3}[.\\- ]?\\d{4}$",
         patternMessage: "not a valid phone number",
         required: true,
-        value: "919-555-5555",
+        value: "",
         status: "idle",
+        placeholder: "(919) 999-9999",
       },
     ],
     details: [
@@ -100,6 +103,7 @@ export const config: Config = {
           "Must match the format of City of Raleigh Projects (ex ASR-0001-2025, SUB-0001-2025)",
         required: false,
         status: "idle",
+        placeholder: "SUB-0001-2025",
       },
       {
         name: "pinnum",
@@ -114,6 +118,7 @@ export const config: Config = {
         value: "",
         required: true,
         status: "idle",
+        placeholder: "Project address",
       },
       {
         name: "zipcode",
@@ -122,6 +127,7 @@ export const config: Config = {
         patternMessage: "Must be five digit format",
         required: true,
         status: "idle",
+        placeholder: "27601",
       },
       {
         name: "streetnamesneeded",

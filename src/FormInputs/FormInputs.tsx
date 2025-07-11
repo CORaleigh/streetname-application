@@ -60,6 +60,7 @@ const FormInputs = forwardRef<FormInputsRef, FormInputsProps>(
                   validationIcon="exclamation-mark-circle-f"
                   value={graphic?.getAttribute(formField.name)}
                   type={formField.type}
+                  placeholder={formField.placeholder}
                   oncalciteInputTextInput={(
                     event: TargetedEvent<HTMLCalciteInputTextElement, void>
                   ) => {

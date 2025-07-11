@@ -159,7 +159,7 @@ function Form() {
           href={`${document.location.origin}/streetname-application/${submissionId}`}
           iconStart="link"
           target="_self"
-        ></calcite-link>
+        >{`${document.location.origin}/streetname-application/${submissionId}`}</calcite-link>
       </calcite-dialog>
     </>
   );
