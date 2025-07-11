@@ -146,7 +146,7 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
       setOnProperty(propertyResult.features.length > 0);
     }
     if (propertyResult?.features.length === 0) return;
-    debugger
+    
     const propertyFeature = propertyResult?.features.at(0);
     if (!propertyFeature) return;
     if (graphic) {

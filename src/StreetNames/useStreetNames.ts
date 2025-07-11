@@ -53,7 +53,7 @@ const useStreetNames = ({
     []
   );
 
-    const typesNotAllowedInName = useMemo(
+  const typesNotAllowedInName = useMemo(
     () => [
       "STREET",
       "BOULEVARD",
@@ -67,7 +67,7 @@ const useStreetNames = ({
       "PLACE",
       "ROAD",
       "TRAIL",
-      "WAY"
+      "WAY",
     ],
     []
   );
@@ -201,7 +201,10 @@ const useStreetNames = ({
       });
 
       typesNotAllowedInName.forEach((type) => {
-        if (name.toUpperCase().startsWith(type+" ") || name.toUpperCase().endsWith(" "+type)) {
+        if (
+          name.toUpperCase().startsWith(type + " ") ||
+          name.toUpperCase().endsWith(" " + type)
+        ) {
           return {
             status: "invalid",
             message: "Street name cannot contain a street type",
@@ -209,7 +212,7 @@ const useStreetNames = ({
             typeValid: type !== "",
           } as Validity;
         }
-      });      
+      });
 
       if (name.length < 3)
         return {
@@ -252,7 +255,14 @@ const useStreetNames = ({
         typeValid: true,
       } as Validity;
     },
-    [directions, existingStreets, streetNameGraphics, streetNames, streetsLookupTable, typesNotAllowedInName]
+    [
+      directions,
+      existingStreets,
+      streetNameGraphics,
+      streetNames,
+      streetsLookupTable,
+      typesNotAllowedInName,
+    ]
   );
 
   useEffect(() => {
@@ -431,28 +441,34 @@ const useStreetNames = ({
 
   const deleteStreet = useCallback(
     (i: number) => {
-      const maxOrder =
-        streetNames.length > 0
-          ? Math.max(...streetNames.map((g) => g.order))
-          : 0;
       setStreetNames((prev) => {
-        const updated = prev.filter((_, idx) => idx !== i);
-        while (updated.length < minStreetNameCount!) {
-          updated.push({
+        // Remove the item at index `i`
+        const filtered = prev.filter((_, idx) => idx !== i);
+
+        // Ensure the array meets the minimum length
+        while (filtered.length < minStreetNameCount!) {
+          filtered.push({
             streetname: "",
             streettype: "",
             status: "invalid",
             message: "required",
             nameValid: false,
             typeValid: false,
-            order: maxOrder + 1,
             id: crypto.randomUUID(),
+            order: 1
           });
         }
+
+        // Reassign order values
+        const updated = filtered.map((street, index) => ({
+          ...street,
+          order: index + 1,
+        }));
+
         return updated;
       });
     },
-    [minStreetNameCount, setStreetNames, streetNames]
+    [minStreetNameCount, setStreetNames]
   );
 
   const addStreet = useCallback(() => {
