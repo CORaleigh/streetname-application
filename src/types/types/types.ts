@@ -79,3 +79,10 @@ export type JurisdictionLink = {
   name: string;
   href: string;
 }
+
+export type SimilarStreet = {
+  streetname: string;
+  similar: boolean;
+  matchRatio: number;
+  normalizedDistance: number;
+};

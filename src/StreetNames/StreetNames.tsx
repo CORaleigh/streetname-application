@@ -27,6 +27,7 @@ const StreetNames: React.FC<StreetNamesProps> = ({
     validStreetsCount,
     minStreetNameCount,
     handleStreetNameInput,
+    handleStreetNameCommit,
     handleStreetTypeSelect,
     deleteStreet,
     addStreet,
@@ -106,6 +107,9 @@ const StreetNames: React.FC<StreetNamesProps> = ({
                           oncalciteInputTextInput={(
                             e: TargetedEvent<HTMLCalciteInputTextElement, void>
                           ) => handleStreetNameInput(e.target, street, i)}
+                          oncalciteInputTextChange={(
+                            e: TargetedEvent<HTMLCalciteInputTextElement, void>
+                          ) => handleStreetNameCommit(e.target, street, i)}
                         ></calcite-input-text>
                         {street.status === "valid" &&
                           street.message.length > 0 && (

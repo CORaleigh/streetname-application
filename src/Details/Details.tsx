@@ -4,7 +4,6 @@ import FormInputs from "../FormInputs/FormInputs";
 
 import type { FormField } from "../types/types/types";
 import useDetails from "./useDetails";
-
 interface DetailsProps {
   formFields: FormField[];
   layer: FeatureLayer;
@@ -31,11 +30,19 @@ const Details: React.FC<DetailsProps> = ({
       {fieldsLoaded && (
         <FormInputs ref={inputRef} fields={fields} setFields={setFields} />
       )}
-      <calcite-input
-        type="file"
-        accept=".pdf"
-        oncalciteInputChange={handleFileInput}
-      ></calcite-input>
+      <calcite-label>
+        Upload Supporting Documents
+        <calcite-input
+          type="file"
+          accept=".pdf"
+          oncalciteInputChange={handleFileInput}
+        ></calcite-input>
+              <calcite-notice title="File Upload Notice" open width="full" kind="info" icon="information-f"> 
+        <div slot="message">
+          Please upload a PDF file that shows the streets for your project.  Do not upload an entire plan set, just a page showing the streets.
+        </div>
+      </calcite-notice>
+      </calcite-label>
 
       <calcite-button
         scale="l"

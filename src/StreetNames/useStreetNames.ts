@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { StreetName, Validity } from "../types/types/types";
 import { getFromIndexedDB, openStreetDB, setInIndexedDB } from "./streetsdb";
-import { streetsSoundSimilar } from "./checkSound";
+//import { streetsSoundSimilar } from "./checkSound";
 import { streetNameList, streetNameListLastUpdated } from "./streetnameslist";
 import { useStreetNameAppContext } from "../Context/useStreetNameAppContext";
 import Graphic from "@arcgis/core/Graphic";
@@ -9,6 +9,7 @@ import { config } from "../config";
 import type { TargetedEvent } from "@arcgis/map-components";
 import type { List } from "@esri/calcite-components/components/calcite-list";
 import { toTitleCase } from "../utils";
+import useCheckSoundWorker from "./useCheckSoundWorker";
 
 // Define any types for your hook's inputs and outputs
 interface UseStreetNamesOptions {
@@ -38,6 +39,7 @@ const useStreetNames = ({
   const checkedStreetStorage = useRef(false);
   const [showAdditionalStreetsAdded, setShowAdditionalStreetsAdded] =
     useState<boolean>(false);
+  const { checkSoundsSimilar } = useCheckSoundWorker(existingStreets);
 
   const directions = useMemo(
     () => [
@@ -113,7 +115,14 @@ const useStreetNames = ({
         (streetName: StreetName) =>
           streetName.streetname.toUpperCase() === name.toUpperCase().trim()
       );
-
+      if (name.trim() === "") {
+        return {
+          status: "invalid",
+          message: "Street name is required",
+          nameValid: false,
+          typeValid: type !== "",
+        } as Validity;
+      }
       if (enteredStreetNames.length > 1) {
         return {
           status: "invalid",
@@ -214,13 +223,18 @@ const useStreetNames = ({
         }
       });
 
-      if (name.length < 3)
+      const words = name.trim().split(/\s+/);
+      const allWordsValid = words.every((word) => word.length >= 3);
+
+      if (!allWordsValid) {
         return {
           status: "invalid",
-          message: "Street name must be at least three characters",
+          message:
+            "Each word in the street name must be at least three characters",
           nameValid: false,
           typeValid: type !== "",
         } as Validity;
+      }
       const wordCount = name.split(" ");
       if (wordCount.length > 2)
         return {
@@ -230,13 +244,12 @@ const useStreetNames = ({
           typeValid: type !== "",
         } as Validity;
 
-      const similarStreet = existingStreets.find((street) =>
-        streetsSoundSimilar(name.trim(), street)
-      );
-      if (similarStreet) {
+      const similarStreet = await checkSoundsSimilar(name.trim());
+
+      if (similarStreet && similarStreet.similar) {
         return {
           status: "valid",
-          message: `May sound like ${similarStreet}, you can still submit it`,
+          message: `May sound like ${similarStreet?.streetname}, you can still submit it. (ratio: ${similarStreet?.matchRatio}, distance: ${similarStreet?.normalizedDistance})`,
           nameValid: true,
           typeValid: type !== "",
         } as Validity;
@@ -256,6 +269,7 @@ const useStreetNames = ({
       } as Validity;
     },
     [
+      checkSoundsSimilar,
       directions,
       existingStreets,
       streetNameGraphics,
@@ -348,6 +362,22 @@ const useStreetNames = ({
     }
   }, [validStreetsCount, minStreetNameCount, onValid]);
 
+  const handleStreetNameCommit = useCallback(
+    (_input: HTMLCalciteInputTextElement, street: StreetName, i: number) => {
+      setStreetNames((prev) =>
+        prev.map((s, idx) =>
+          idx === i
+            ? {
+                ...s,
+                streetname: toTitleCase(street.streetname),
+
+              }
+            : s
+        )
+      );
+    },
+    [setStreetNames]
+  );
   const handleStreetNameInput = useCallback(
     (input: HTMLCalciteInputTextElement, street: StreetName, i: number) => {
       if (debounceTimers.current[i]) {
@@ -366,7 +396,7 @@ const useStreetNames = ({
               idx === i
                 ? {
                     ...s,
-                    streetname: toTitleCase(input.value),
+                    streetname: input.value,
                     status: validity.status,
                     message: validity.message,
                     nameValid: validity.nameValid,
@@ -574,6 +604,7 @@ const useStreetNames = ({
     validStreetsCount,
     minStreetNameCount,
     handleStreetNameInput,
+    handleStreetNameCommit,
     handleStreetTypeSelect,
     deleteStreet,
     addStreet,

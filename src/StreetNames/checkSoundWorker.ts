@@ -1,8 +1,18 @@
-import doubleMetaphone from 'talisman/phonetics/double-metaphone';
-import levenshtein from 'talisman/metrics/levenshtein';
-import type { SimilarStreet } from '../types/types/types';
+/// <reference lib="webworker" />
+
+import doubleMetaphone from "talisman/phonetics/double-metaphone";
+import levenshtein from "talisman/metrics/levenshtein";
 
 type PhoneticCode = [string, string | null];
+
+interface SimilarStreet {
+  streetname: string;
+  similar: boolean;
+  matchRatio: number;
+  normalizedDistance: number;
+}
+
+let cachedStreetList: string[] = [];
 
 const getCodes = (word: string): PhoneticCode => doubleMetaphone(word);
 
@@ -17,12 +27,11 @@ const getPhoneticWords = (name: string): PhoneticCode[] =>
 const codesMatch = (code1: PhoneticCode, code2: PhoneticCode): boolean =>
   code1.some(c1 => c1 && code2.includes(c1));
 
-const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
+const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, "");
 
-export const streetsSoundSimilar = (
+const streetsSoundSimilar = (
   name1: string,
   name2: string,
-  wordMatchThreshold = 0.5
 ): SimilarStreet => {
   const normalized1 = name1.trim().toLowerCase();
   const normalized2 = name2.trim().toLowerCase();
@@ -42,23 +51,29 @@ export const streetsSoundSimilar = (
   const editDistance = levenshtein(joined1, joined2);
   const normalizedDistance = editDistance / Math.max(joined1.length, joined2.length);
 
+  // Reject if edit distance too high
+  if (normalizedDistance > 0.35) {
+    return {
+      streetname: name2,
+      similar: false,
+      matchRatio: 0,
+      normalizedDistance,
+    };
+  }
+
   const words1 = getPhoneticWords(normalized1);
   const words2 = getPhoneticWords(normalized2);
 
-  // Stop on first phonetic word match:
-  let foundMatch = false;
+  let phoneticMatch = false;
   for (const code1 of words1) {
     for (const code2 of words2) {
       if (codesMatch(code1, code2)) {
-        foundMatch = true;
+        phoneticMatch = true;
         break;
       }
     }
-    if (foundMatch) break;
+    if (phoneticMatch) break;
   }
-
-  // For matchRatio, if stopping early, you can just set it to 1 if a match found, else 0
-  const matchRatio = foundMatch ? 1 : 0;
 
   const firstWord1Str = normalized1.split(/\s+/)[0];
   const firstWord2Str = normalized2.split(/\s+/)[0];
@@ -70,11 +85,13 @@ export const streetsSoundSimilar = (
     firstWordsSimilar = codesMatch(firstWord1, firstWord2);
   }
 
-  const allowLooserEditDistance = firstWordsSimilar && matchRatio > 0.75;
+  const allowLooserEditDistance = firstWordsSimilar && phoneticMatch;
 
   const similar =
-    (firstWordsSimilar && matchRatio >= wordMatchThreshold && normalizedDistance <= 0.25) ||
+    (firstWordsSimilar && phoneticMatch && normalizedDistance <= 0.25) ||
     (allowLooserEditDistance && normalizedDistance <= 0.35);
+
+  const matchRatio = phoneticMatch ? 1 : 0;
 
   return {
     streetname: name2,
@@ -83,3 +100,25 @@ export const streetsSoundSimilar = (
     normalizedDistance,
   };
 };
+
+// Worker message handler
+self.onmessage = (e) => {
+  const { type } = e.data;
+
+  if (type === "init") {
+    cachedStreetList = e.data.streetList;
+    return;
+  }
+
+  if (type === "check") {
+    const { id, inputName } = e.data;
+
+    const match = cachedStreetList
+      .map((street) => streetsSoundSimilar(inputName, street))
+      .find((result) => result.similar);
+
+    self.postMessage({ id, match });
+  }
+};
+
+export {};
