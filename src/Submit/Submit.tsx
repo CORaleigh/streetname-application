@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React, {  } from "react";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 import type { FormField, StreetName } from "../types/types/types";
@@ -7,7 +7,6 @@ import ApplicationDetails from "../ApplicationDetails/ApplicationDetails";
 import { config } from "../config";
 import { useStreetNameAppContext } from "../Context/useStreetNameAppContext";
 import { useCalciteBreakpoint } from "../useCalciteBreakpoints";
-import { truncate } from "fs/promises";
 
 interface SubmitProps {
   layer: FeatureLayer;

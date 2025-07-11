@@ -47,7 +47,27 @@ const useFormInput = ({ fields, setFields, ref }: UseFormInputOptions) => {
             : f
         )
       );
-      graphic.attributes[formField.name] = element.value;
+      let value: string | number = element.value;
+
+      if (
+        formField.field &&
+        ["integer", "small-integer", "single", "long"].includes(
+          formField.field.type
+        )
+      ) {
+        value = parseInt(element.value);
+        if (isNaN(value)) {
+          value = 0;
+        }
+      }
+      if (formField.field && formField.field.type === "double") {
+        value = parseFloat(element.value);
+        if (isNaN(value)) {
+          value = 0.0;
+        }
+      }
+      graphic.attributes[formField.name] = value;
+
       setGraphic(graphic.clone());
       return status;
     },
