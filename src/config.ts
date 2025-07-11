@@ -70,7 +70,7 @@ export const config: Config = {
       },
       {
         name: "email",
-        pattern:"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+        pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
         patternMessage: "not a valid email address",
         value: "test@test.com",
         required: true,
@@ -78,8 +78,10 @@ export const config: Config = {
       },
       {
         name: "phone",
-        value: "",
+        pattern: "^\\(?\\d{3}\\)?[.\\- ]?\\d{3}[.\\- ]?\\d{4}$",
+        patternMessage: "not a valid phone number",
         required: true,
+        value: "919-555-5555",
         status: "idle",
       },
     ],
@@ -143,7 +145,7 @@ export const config: Config = {
     countyApproved:
       "https://prod-50.usgovtexas.logic.azure.us:443/workflows/6d972c4a8579457b91ab1eb1b6b4264e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pPjpp3obhs89htO73P-_pb2may4jPSeD6c2ZHcdgI-A",
     rejected:
-      "https://prod-01.usgovtexas.logic.azure.us:443/workflows/ad6d95784fcd4a06aab213e34dc8d171/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UaQYaCsg5ie-kKL4vqxp4dR1HXx49-SBe4j1N6AFAfE",
+      "https://prod-56.usgovtexas.logic.azure.us:443/workflows/95eae770aeda4203bbe0252785301fb2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DPbzNZxJT9wzJzumCIMerbW23sxeM3pgTfDlxCd0IjI",
   },
   rules: [
     "Street names shall not contain more than 20 characters, including the directional (if any).",

@@ -34,11 +34,11 @@ const Intro: React.FC<IntroProps> = ({ onNext }) => {
         >
           View Street Name Rules
         </calcite-button>
-    <p/>
+        <p />
         The following street type definitions should be used when selecting
         possible street names to better the chances of submitting an approvable
         street name:
-        <p/>
+        <p />
         <calcite-button
           scale="l"
           width="auto"
@@ -55,13 +55,19 @@ const Intro: React.FC<IntroProps> = ({ onNext }) => {
         >
           RaleighAddress@raleighnc.gov
         </calcite-link>
-        <p/>
+        <p />
         For more information, please visit our page on the City website:
-        <calcite-link iconStart="link" href="https://raleighnc.gov/permits/services/new-street-names">New Street Names</calcite-link>
+        <calcite-link
+          iconStart="link"
+          href="https://raleighnc.gov/permits/services/new-street-names"
+        >
+          New Street Names
+        </calcite-link>
         <p />
         Have you read and agree to the follow these guidelines?
         <p />
         <calcite-button
+          slot="footer-start"
           scale="l"
           iconStart="check"
           onClick={() => onNext("contact")}
@@ -69,8 +75,14 @@ const Intro: React.FC<IntroProps> = ({ onNext }) => {
           I Agree
         </calcite-button>
       </calcite-panel>
-      <StreetRulesDialog open={visibleDialog === "rules"} onClose={() => setVisibleDialog(undefined)}></StreetRulesDialog>
-      <StreetTypesDialog open={visibleDialog === "types"} onClose={() => setVisibleDialog(undefined)}></StreetTypesDialog>
+      <StreetRulesDialog
+        open={visibleDialog === "rules"}
+        onClose={() => setVisibleDialog(undefined)}
+      ></StreetRulesDialog>
+      <StreetTypesDialog
+        open={visibleDialog === "types"}
+        onClose={() => setVisibleDialog(undefined)}
+      ></StreetTypesDialog>
     </>
   );
 };

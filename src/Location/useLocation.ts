@@ -33,7 +33,7 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
   const [inEtj, setInEtj] = useState<boolean>(false);
   const [onProperty, setOnProperty] = useState<boolean>(false);
   const [mapPoint, setMapPoint] = useState<__esri.Point | undefined>(undefined);
-
+  const layersLoaded = useRef<boolean>(false);
   const handleSearchComplete = async (
     event: TargetedEvent<
       HTMLArcgisSearchElement,
@@ -62,16 +62,23 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
     } else {
       feature = event.target.results[0].results[0].feature;
     }
+    checkGeometry(resultFound, feature);
+  };
 
+  const checkGeometry = useCallback(async (
+    resultFound: boolean, 
+    feature?: __esri.Graphic
+  ) => {
+   
     const searchPoint: __esri.Point =
-      !resultFound && mapPoint ? mapPoint : (feature?.geometry as __esri.Point);
+      !resultFound && mapPoint ? mapPoint : feature ? (feature?.geometry as __esri.Point) : graphic?.geometry as __esri.Point;
     const propertyResult = await propertyLayer.current?.queryFeatures({
       geometry: searchPoint,
       outFields: ["SITE_ADDRESS", "PIN_NUM", "CITY_DECODE"],
       returnGeometry: true,
     });
-
-    if (!feature && propertyResult.features.length > 0) {
+    
+    if (!feature && propertyResult && propertyResult.features.length > 0) {
       const parcel = propertyResult.features.at(0);
       if (!parcel) return;
 
@@ -92,8 +99,9 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
       where: "JURISDICTION = 'RALEIGH'",
       geometry: searchPoint,
     });
-
-    setInEtj(etjCount > 0);
+    if (etjCount) {
+      setInEtj(etjCount > 0);
+    }
 
     if (etjCount === 0) {
       const etjResults = await etjLayer.current?.queryFeatures({
@@ -102,13 +110,13 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
         outFields: ["JURISDICTION"],
         returnGeometry: false,
       });
-      if (etjResults.features.length === 0) {
+      if (etjResults && etjResults.features.length === 0) {
         setJurisdictionLink({
           name: "Wake County",
           href: "https://www.wake.gov/departments-government/geographic-information-services-gis/addresses-road-names-and-street-signs/road-name-approval-guide",
         });
       } else {
-        const match = etjResults.features.at(0)?.getAttribute("JURISDICTION");
+        const match = etjResults?.features.at(0)?.getAttribute("JURISDICTION");
         if (match === "CARY") {
           setJurisdictionLink({
             name: "Cary",
@@ -134,24 +142,29 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
       return;
     }
     setJurisdictionLink(undefined);
-
-    setOnProperty(propertyResult.features.length > 0);
-    if (propertyResult.features.length === 0) return;
-    const propertyFeature = propertyResult.features.at(0);
-    if (!propertyFeature) return;
-    graphic.geometry = searchPoint;
-    if (feature) {
-      graphic.setAttribute("zipcode", feature.getAttribute("Postal"));
-      graphic.setAttribute("address", feature.getAttribute("Match_addr"));
+    if (propertyResult?.features) {
+      setOnProperty(propertyResult.features.length > 0);
     }
-    graphic.setAttribute("pinnum", propertyFeature.getAttribute("PIN_NUM"));
+    if (propertyResult?.features.length === 0) return;
+    debugger
+    const propertyFeature = propertyResult?.features.at(0);
+    if (!propertyFeature) return;
+    if (graphic) {
+      graphic.geometry = searchPoint;
+    }
+ 
+    if (feature) {
+      graphic?.setAttribute("zipcode", feature.getAttribute("Postal"));
+      graphic?.setAttribute("address", feature.getAttribute("Match_addr"));
+    }
+    graphic?.setAttribute("pinnum", propertyFeature.getAttribute("PIN_NUM"));
 
-    console.log(graphic.attributes);
+    console.log(graphic?.attributes);
 
-    setGraphic(graphic.clone());
-  };
+    setGraphic(graphic?.clone());
+  }, [graphic, mapPoint, setGraphic]);
 
-  const layerViewCreated = (
+  const layerViewCreated = async (
     event: TargetedEvent<HTMLArcgisMapElement, __esri.ViewLayerviewCreateEvent>
   ) => {
     if (event.detail.layer.title === "Raleigh Jurisdiction") {
@@ -160,6 +173,18 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
     if (event.detail.layer.title === "Properties") {
       propertyLayer.current = event.detail.layer as __esri.FeatureLayer;
     }
+    await propertyLayer.current?.load();
+    await etjLayer.current?.load();
+    layersLoaded.current = true;
+    
+    if (graphic?.geometry) {
+      checkGeometry(false);
+      arcgisMap.current?.goTo({
+        target: graphic.geometry,
+        zoom: 16,
+      });
+    }
+
   };
   const mapViewClicked = (
     event: TargetedEvent<HTMLArcgisMapElement, __esri.ViewClickEvent>
@@ -202,10 +227,13 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
   }, [graphic]);
 
   useEffect(() => {
-    if (graphic) {
+    if (graphic?.geometry) {
       addPin();
     }
-  }, [addPin, graphic]);
+  }, [addPin, checkGeometry, graphic?.geometry]);
+
+
+
 
   useEffect(() => {
     onValid("details", Boolean(inEtj && onProperty && graphic?.geometry));

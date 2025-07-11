@@ -10,11 +10,7 @@ interface UseFormInputOptions {
   ref: React.ForwardedRef<FormInputsRef>;
 }
 
-const useFormInput = ({
-  fields,
-  setFields,
-  ref,
-}: UseFormInputOptions) => {
+const useFormInput = ({ fields, setFields, ref }: UseFormInputOptions) => {
   const { graphic, setGraphic } = useStreetNameAppContext();
 
   const checkInput = useCallback(
@@ -25,8 +21,21 @@ const useFormInput = ({
       if (!graphic) return;
       const input = element.shadowRoot?.querySelector("input");
       const status = input?.checkValidity() ? "valid" : "invalid";
-      const message = input?.validity.patternMismatch ? formField.patternMessage : status === 'invalid' ? input?.validationMessage : undefined;
-      
+      if (formField.name === "phone") {
+        const cleaned = element.value.replace(/[^0-9().\-\s]/g, "");
+
+        // Update the input's value with cleaned text
+        if (cleaned !== element.value) {
+          element.value = cleaned;
+        }
+        element.value = formatPhoneNumber(element.value);
+      }
+      const message = input?.validity.patternMismatch
+        ? formField.patternMessage
+        : status === "invalid"
+        ? input?.validationMessage
+        : undefined;
+
       setFields((prevFields) =>
         prevFields.map((f) =>
           f.name === formField.name
@@ -62,6 +71,22 @@ const useFormInput = ({
     });
     return valid;
   };
+
+  function formatPhoneNumber(value: string): string {
+    // Keep only digits and allowed punctuation
+    const cleaned = value.replace(/[^0-9().\-\s]/g, "");
+
+    // Extract digits only for validation and formatting
+    const digits = cleaned.replace(/\D/g, "");
+
+    if (digits.length !== 10) return value; // return original if not 10 digits
+
+    const areaCode = digits.slice(0, 3);
+    const prefix = digits.slice(3, 6);
+    const lineNumber = digits.slice(6, 10);
+
+    return `(${areaCode}) ${prefix}-${lineNumber}`;
+  }
 
   useImperativeHandle(ref, () => ({
     checkAllInputs,

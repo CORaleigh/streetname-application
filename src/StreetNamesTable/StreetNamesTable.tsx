@@ -170,7 +170,7 @@ const StreetNamesTable: React.FC<StreetNamesTableProps> = ({
                     event: TargetedEvent<HTMLCalciteSelectElement, void>
                   ) => handleStreetTypeChanged(event.target.value, streetName)}
                 >
-                  {config.allowedStreetTypes.map((streetType) => (
+                  {config.allowedStreetTypes.map((streetType: string | undefined) => (
                     <calcite-option key={streetType} value={streetType}>
                       {streetType}
                     </calcite-option>

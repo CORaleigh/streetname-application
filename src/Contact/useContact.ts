@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import type { FormInputsRef } from "../FormInputs/FormInputs";
 import type { FormField } from "../types/types/types";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import useLocalStorage from "../useLocalStorage";
+import { useStreetNameAppContext } from "../Context/useStreetNameAppContext";
 
 // Define any types for your hook's inputs and outputs
 interface UseContactOptions {
@@ -11,9 +13,11 @@ interface UseContactOptions {
 }
 
 const useContact = ({ formFields, layer, onValid }: UseContactOptions) => {
+  const { graphic } = useStreetNameAppContext();
   const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
   const [fields, setFields] = useState<FormField[]>(formFields);
   const inputRef = useRef<FormInputsRef>(null);
+  const [, setContact] = useLocalStorage<string>("street_app_contact", "");
   useEffect(() => {
     if (!layer.loaded) return;
     formFields.forEach((formField: FormField) => {
@@ -29,7 +33,19 @@ const useContact = ({ formFields, layer, onValid }: UseContactOptions) => {
       (field: FormField) => field.status !== "valid"
     );
     onValid("location", invalidFields.length === 0);
-  }, [fields, onValid]);
+  }, [fields, formFields, onValid, setContact]);
+
+  useEffect(() => {
+    const obj: { [x: string]: string } = {};
+
+    formFields.forEach((field: FormField) => {
+      obj[field.name] = graphic?.getAttribute(field.name);
+    });
+
+    setContact(JSON.stringify(obj));
+  }, [formFields, graphic, setContact]);
+
+
 
   return { inputRef, fieldsLoaded, fields, setFields };
 };

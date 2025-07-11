@@ -18,7 +18,7 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
   fields,
   expanded
 }) => {
-  const { graphic } = useStreetNameAppContext();
+  const { graphic, loaded } = useStreetNameAppContext();
   const { detailsMap, handleViewReady } = useApplicationDetails();
 
   return (
@@ -29,7 +29,7 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
         description="application details"
         expanded={expanded}
       >
-        {graphic &&  <div className="details-container">
+        { loaded &&  <div className="details-container">
          <calcite-table caption={"Details"} striped>
             <calcite-table-row>
               <calcite-table-header heading="Field"></calcite-table-header>

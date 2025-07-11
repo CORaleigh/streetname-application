@@ -30,7 +30,11 @@ function Form() {
     <>
       <Navigation></Navigation>
       <calcite-stepper
-        layout={breakpoint === 'xs' || breakpoint === 'xxs' ? 'vertical' : 'horizontal' }
+        layout={
+          breakpoint === "xs" || breakpoint === "xxs"
+            ? "vertical"
+            : "horizontal"
+        }
         oncalciteStepperChange={(
           event: TargetedEvent<HTMLCalciteStepperElement, void>
         ) => {
@@ -141,9 +145,9 @@ function Form() {
         open={submissionId.length > 0}
         heading="Submission Successful"
         modal
-        oncalciteDialogClose={() =>
-          (location.href = `${document.location.origin}/streetname-application/${submissionId}`)
-        }
+        oncalciteDialogClose={() => {
+          location.href = `${document.location.origin}/streetname-application/${submissionId}`;
+        }}
       >
         Your application has successfully been submitted. Staff will begin
         reviewing the application. If not enough street names are approved, you
@@ -151,7 +155,11 @@ function Form() {
         submitted. Once the application is approved by city staff, it will be
         sent to the county for final approval. To check the status of your
         application, please refer to following link:
-        {`${document.location.origin}/streetname-application/status/${submissionId}`}
+        <calcite-link
+          href={`${document.location.origin}/streetname-application/${submissionId}`}
+          iconStart="link"
+          target="_self"
+        ></calcite-link>
       </calcite-dialog>
     </>
   );
