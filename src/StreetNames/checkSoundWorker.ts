@@ -61,34 +61,29 @@ const streetsSoundSimilar = (name1: string, name2: string): SimilarStreet => {
   const words1 = getPhoneticWords(normalized1);
   const words2 = getPhoneticWords(normalized2);
 
-  // First words must match
-  const firstWordMatch = codesMatch(words1[0], words2[0]);
-
-  // Remaining words: loose any-to-any match
-  const remaining1 = words1.slice(1);
-  const remaining2 = words2.slice(1);
-
-  let looseMatch = false;
-  for (const code1 of remaining1) {
-    for (const code2 of remaining2) {
+  // Any word-to-word phonetic match
+  let anyPhoneticMatch = false;
+  for (const code1 of words1) {
+    for (const code2 of words2) {
       if (codesMatch(code1, code2)) {
-        looseMatch = true;
+        anyPhoneticMatch = true;
         break;
       }
     }
-    if (looseMatch) break;
+    if (anyPhoneticMatch) break;
   }
 
-  const phoneticMatch = firstWordMatch && (remaining1.length === 0 || looseMatch);
+  // First word match for safety net
+  const firstWordMatch = codesMatch(words1[0], words2[0]);
 
   const similar =
-    (phoneticMatch && normalizedDistance <= 0.35) ||
+    (anyPhoneticMatch && normalizedDistance <= 0.35) ||
     (firstWordMatch && normalizedDistance <= 0.25); // safety net
 
   return {
     streetname: name2,
     similar,
-    matchRatio: phoneticMatch ? 1 : 0,
+    matchRatio: anyPhoneticMatch ? 1 : 0,
     normalizedDistance,
   };
 };
