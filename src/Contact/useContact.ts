@@ -45,8 +45,6 @@ const useContact = ({ formFields, layer, onValid }: UseContactOptions) => {
     setContact(JSON.stringify(obj));
   }, [formFields, graphic, setContact]);
 
-
-
   return { inputRef, fieldsLoaded, fields, setFields };
 };
 

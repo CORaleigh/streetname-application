@@ -1,4 +1,4 @@
-import React, {  } from "react";
+import React from "react";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 import type { FormField, StreetName } from "../types/types/types";
@@ -22,8 +22,8 @@ const Submit: React.FC<SubmitProps> = ({
   onPrevious,
   onSuccess,
 }) => {
-    const { streetNames } = useStreetNameAppContext();
-    const breakpoint = useCalciteBreakpoint()
+  const { streetNames } = useStreetNameAppContext();
+  const breakpoint = useCalciteBreakpoint();
   const { submitApplication, submitting, submitted } = useSubmit({
     layer,
     streetsTable,
@@ -39,7 +39,9 @@ const Submit: React.FC<SubmitProps> = ({
       <ApplicationDetails
         layer={layer}
         fields={fields}
-        expanded={breakpoint === "xs" || breakpoint === "xxs" ? undefined : true}
+        expanded={
+          breakpoint === "xs" || breakpoint === "xxs" ? undefined : true
+        }
       ></ApplicationDetails>
       <h2>Street Names</h2>
 

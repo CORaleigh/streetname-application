@@ -41,6 +41,12 @@ const useStreetNames = ({
     useState<boolean>(false);
   const { checkSoundsSimilar } = useCheckSoundWorker(existingStreets);
 
+  const streetNamesRef = useRef<StreetName[]>(streetNames);
+
+  useEffect(() => {
+    streetNamesRef.current = streetNames;
+  }, [streetNames]);
+
   const directions = useMemo(
     () => [
       "NORTH",
@@ -363,14 +369,17 @@ const useStreetNames = ({
   }, [validStreetsCount, minStreetNameCount, onValid]);
 
   const handleStreetNameCommit = useCallback(
-    (_input: HTMLCalciteInputTextElement, street: StreetName, i: number) => {
+    (input: HTMLCalciteInputTextElement, i: number) => {
+      const value = toTitleCase(input.value);
+      const currentStreet = streetNamesRef.current[i];
+      if (!currentStreet) return;
+
       setStreetNames((prev) =>
         prev.map((s, idx) =>
           idx === i
             ? {
                 ...s,
-                streetname: toTitleCase(street.streetname),
-
+                streetname: value,
               }
             : s
         )
@@ -378,40 +387,54 @@ const useStreetNames = ({
     },
     [setStreetNames]
   );
+
   const handleStreetNameInput = useCallback(
-    (input: HTMLCalciteInputTextElement, street: StreetName, i: number) => {
+    (input: HTMLCalciteInputTextElement, i: number) => {
+      const value = input.value;
+
       if (debounceTimers.current[i]) {
         clearTimeout(debounceTimers.current[i]);
       }
 
-      debounceTimers.current[i] = window.setTimeout(
-        async () => {
-          const validity = await checkStreetName(
-            input.value,
-            street.streettype
-          );
+      // Immediately update the UI (for better user feedback)
+      // setStreetNames((prev) =>
+      //   prev.map((s, idx) =>
+      //     idx === i
+      //       ? {
+      //           ...s,
+      //           streetname: value,
+      //         }
+      //       : s
+      //   )
+      // );
 
-          setStreetNames((prev) =>
-            prev.map((s, idx) =>
-              idx === i
-                ? {
-                    ...s,
-                    streetname: input.value,
-                    status: validity.status,
-                    message: validity.message,
-                    nameValid: validity.nameValid,
-                    typeValid: validity.typeValid,
-                  }
-                : s
-            )
-          );
-          delete debounceTimers.current[i];
-        },
-        400 // debounce delay in ms
-      );
+      debounceTimers.current[i] = window.setTimeout(async () => {
+        const currentStreet = streetNamesRef.current[i];
+        if (!currentStreet) return;
+
+        const validity = await checkStreetName(value, currentStreet.streettype);
+
+        setStreetNames((prev) =>
+          prev.map((s, idx) =>
+            idx === i
+              ? {
+                  ...s,
+                  streetname: value,
+                  status: validity.status,
+                  message: validity.message,
+                  nameValid: validity.nameValid,
+                  typeValid: validity.typeValid,
+                }
+              : s
+          )
+        );
+
+        delete debounceTimers.current[i];
+      }, 400);
     },
     [checkStreetName, setStreetNames]
   );
+
   const handleStreetTypeSelect = useCallback(
     async (select: HTMLCalciteSelectElement, street: StreetName, i: number) => {
       const validity = await checkStreetName(street.streetname, select.value);

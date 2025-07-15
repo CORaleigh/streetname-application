@@ -2,7 +2,7 @@ import React from "react";
 import "@esri/calcite-components/components/calcite-link";
 import "@esri/calcite-components/components/calcite-notice";
 
-import useIntro from "./useInto";
+import useIntro from "./useIntro";
 import StreetRulesDialog from "./StreetRulesDialog";
 import StreetTypesDialog from "./StreetTypesDialog";
 interface IntroProps {

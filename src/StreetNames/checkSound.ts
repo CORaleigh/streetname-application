@@ -1,6 +1,6 @@
-import doubleMetaphone from 'talisman/phonetics/double-metaphone';
-import levenshtein from 'talisman/metrics/levenshtein';
-import type { SimilarStreet } from '../types/types/types';
+import doubleMetaphone from "talisman/phonetics/double-metaphone";
+import levenshtein from "talisman/metrics/levenshtein";
+import type { SimilarStreet } from "../types/types/types";
 
 type PhoneticCode = [string, string | null];
 
@@ -11,13 +11,13 @@ const getPhoneticWords = (name: string): PhoneticCode[] =>
     .trim()
     .toLowerCase()
     .split(/\s+/)
-    .filter(word => word.length > 2)
+    .filter((word) => word.length > 2)
     .map(getCodes);
 
 const codesMatch = (code1: PhoneticCode, code2: PhoneticCode): boolean =>
-  code1.some(c1 => c1 && code2.includes(c1));
+  code1.some((c1) => c1 && code2.includes(c1));
 
-const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
+const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, "");
 
 export const streetsSoundSimilar = (
   name1: string,
@@ -40,7 +40,8 @@ export const streetsSoundSimilar = (
   const joined2 = normalize(name2);
 
   const editDistance = levenshtein(joined1, joined2);
-  const normalizedDistance = editDistance / Math.max(joined1.length, joined2.length);
+  const normalizedDistance =
+    editDistance / Math.max(joined1.length, joined2.length);
 
   const words1 = getPhoneticWords(normalized1);
   const words2 = getPhoneticWords(normalized2);
@@ -73,7 +74,9 @@ export const streetsSoundSimilar = (
   const allowLooserEditDistance = firstWordsSimilar && matchRatio > 0.75;
 
   const similar =
-    (firstWordsSimilar && matchRatio >= wordMatchThreshold && normalizedDistance <= 0.25) ||
+    (firstWordsSimilar &&
+      matchRatio >= wordMatchThreshold &&
+      normalizedDistance <= 0.25) ||
     (allowLooserEditDistance && normalizedDistance <= 0.35);
 
   return {

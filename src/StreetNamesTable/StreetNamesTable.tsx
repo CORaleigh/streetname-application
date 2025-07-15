@@ -9,10 +9,7 @@ interface StreetNamesTableProps {
   editable?: boolean;
   streetNameGraphics: __esri.Graphic[];
   org?: "" | "city" | "county";
-  updateStreetStatus?: (
-    street: __esri.Graphic,
-    approve: boolean
-  ) => void;
+  updateStreetStatus?: (street: __esri.Graphic, approve: boolean) => void;
   resetStreetStatus?: (street: __esri.Graphic) => "" | undefined;
   handleCommentsChanged?: (
     newValue: string,
@@ -39,8 +36,7 @@ const StreetNamesTable: React.FC<StreetNamesTableProps> = ({
   handleStreetTypeChanged,
 }) => {
   //  const {} = useStreetNamesTable({});
-  const {  graphic } =
-    useStreetNameAppContext();
+  const { graphic } = useStreetNameAppContext();
 
   return (
     <calcite-block
@@ -62,20 +58,22 @@ const StreetNamesTable: React.FC<StreetNamesTableProps> = ({
           <calcite-table-header heading="Name"></calcite-table-header>
           <calcite-table-header heading="Type"></calcite-table-header>
           <calcite-table-header heading="Comments"></calcite-table-header>
-
         </calcite-table-row>
         {streetNameGraphics.map((streetName: __esri.Graphic, i: number) => (
           <calcite-table-row
             key={`street-name-${i}`}
             disabled={
-              org === "county" &&
-              streetName.getAttribute("countyapproved") !== "Yes"  &&
-              (streetNameGraphics.filter(
-                (streetNameGraphic: __esri.Graphic) =>
-                  streetNameGraphic.getAttribute("countyapproved") === "Yes"
-              ).length >= graphic?.getAttribute("streetnamesneeded")) || (org === "county" && streetName.getAttribute("cityapproved") === "No") || graphic?.getAttribute('status') === 'Approved'
+              (org === "county" &&
+                streetName.getAttribute("countyapproved") !== "Yes" &&
+                streetNameGraphics.filter(
+                  (streetNameGraphic: __esri.Graphic) =>
+                    streetNameGraphic.getAttribute("countyapproved") === "Yes"
+                ).length >= graphic?.getAttribute("streetnamesneeded")) ||
+              (org === "county" &&
+                streetName.getAttribute("cityapproved") === "No") ||
+              graphic?.getAttribute("status") === "Approved"
                 ? true
-                : undefined 
+                : undefined
             }
           >
             {editable &&
@@ -170,11 +168,13 @@ const StreetNamesTable: React.FC<StreetNamesTableProps> = ({
                     event: TargetedEvent<HTMLCalciteSelectElement, void>
                   ) => handleStreetTypeChanged(event.target.value, streetName)}
                 >
-                  {config.allowedStreetTypes.map((streetType: string | undefined) => (
-                    <calcite-option key={streetType} value={streetType}>
-                      {streetType}
-                    </calcite-option>
-                  ))}
+                  {config.allowedStreetTypes.map(
+                    (streetType: string | undefined) => (
+                      <calcite-option key={streetType} value={streetType}>
+                        {streetType}
+                      </calcite-option>
+                    )
+                  )}
                 </calcite-select>
               )}
               {!editable && streetName.getAttribute("streettype")}

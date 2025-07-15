@@ -37,11 +37,18 @@ const Details: React.FC<DetailsProps> = ({
           accept=".pdf"
           oncalciteInputChange={handleFileInput}
         ></calcite-input>
-              <calcite-notice title="File Upload Notice" open width="full" kind="info" icon="information-f"> 
-        <div slot="message">
-          Please upload a PDF file that shows the streets for your project.  Do not upload an entire plan set, just a page showing the streets.
-        </div>
-      </calcite-notice>
+        <calcite-notice
+          title="File Upload Notice"
+          open
+          width="full"
+          kind="info"
+          icon="information-f"
+        >
+          <div slot="message">
+            Please upload a PDF file that shows the streets for your project. Do
+            not upload an entire plan set, just a page showing the streets.
+          </div>
+        </calcite-notice>
       </calcite-label>
 
       <calcite-button

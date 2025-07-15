@@ -116,7 +116,7 @@ const useReview = ({
 
     const needed = graphic?.getAttribute("streetnamesneeded");
     let reviewNotice: Notice;
-    
+
     if (org === "city" && reviewed < streetNameGraphics.length) {
       reviewNotice = {
         heading: `All Street Needs Need Reviewed`,
@@ -277,7 +277,7 @@ const useReview = ({
         "status",
         `${org === "city" ? "City" : org === "county" ? "County" : ""} Rejected`
       );
-      
+
       sendEmail(config.flows.rejected, graphic.getAttribute("GlobalID"));
       setDialog({
         open: true,
@@ -318,8 +318,8 @@ const useReview = ({
   };
 
   const impersonate = () => {
-    setOrg((prev) => prev === 'city' ? 'county' : 'city');
-  }
+    setOrg((prev) => (prev === "city" ? "county" : "city"));
+  };
   return {
     user,
     org,
@@ -331,7 +331,7 @@ const useReview = ({
     handleStreetTypeChanged,
     handleReviewAction,
     dialog,
-    impersonate
+    impersonate,
   };
 };
 

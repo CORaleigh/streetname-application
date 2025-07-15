@@ -65,104 +65,112 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
     checkGeometry(resultFound, feature);
   };
 
-  const checkGeometry = useCallback(async (
-    resultFound: boolean, 
-    feature?: __esri.Graphic
-  ) => {
-   
-    const searchPoint: __esri.Point =
-      !resultFound && mapPoint ? mapPoint : feature ? (feature?.geometry as __esri.Point) : graphic?.geometry as __esri.Point;
-    const propertyResult = await propertyLayer.current?.queryFeatures({
-      geometry: searchPoint,
-      outFields: ["SITE_ADDRESS", "PIN_NUM", "CITY_DECODE"],
-      returnGeometry: true,
-    });
-    
-    if (!feature && propertyResult && propertyResult.features.length > 0) {
-      const parcel = propertyResult.features.at(0);
-      if (!parcel) return;
-
-      const locateResult = await locator.addressToLocations(config.geocodeUrl, {
-        address: { SingleLine: parcel.getAttribute("SITE_ADDRESS") },
-        outFields: ["*"],
-      });
-      if (!locateResult || locateResult.length === 0) return;
-
-      feature = new Graphic({
-        attributes: locateResult.at(0)?.attributes,
-        geometry: locateResult.at(0)?.location,
-      });
-    }
-    if (!feature) return;
-
-    const etjCount = await etjLayer.current?.queryFeatureCount({
-      where: "JURISDICTION = 'RALEIGH'",
-      geometry: searchPoint,
-    });
-    if (etjCount) {
-      setInEtj(etjCount > 0);
-    }
-
-    if (etjCount === 0) {
-      const etjResults = await etjLayer.current?.queryFeatures({
-        where: "1=1",
+  const checkGeometry = useCallback(
+    async (resultFound: boolean, feature?: __esri.Graphic) => {
+      const searchPoint: __esri.Point =
+        !resultFound && mapPoint
+          ? mapPoint
+          : feature
+          ? (feature?.geometry as __esri.Point)
+          : (graphic?.geometry as __esri.Point);
+      const propertyResult = await propertyLayer.current?.queryFeatures({
         geometry: searchPoint,
-        outFields: ["JURISDICTION"],
-        returnGeometry: false,
+        outFields: ["SITE_ADDRESS", "PIN_NUM", "CITY_DECODE"],
+        returnGeometry: true,
       });
-      if (etjResults && etjResults.features.length === 0) {
-        setJurisdictionLink({
-          name: "Wake County",
-          href: "https://www.wake.gov/departments-government/geographic-information-services-gis/addresses-road-names-and-street-signs/road-name-approval-guide",
+
+      if (!feature && propertyResult && propertyResult.features.length > 0) {
+        const parcel = propertyResult.features.at(0);
+        if (!parcel) return;
+
+        const locateResult = await locator.addressToLocations(
+          config.geocodeUrl,
+          {
+            address: { SingleLine: parcel.getAttribute("SITE_ADDRESS") },
+            outFields: ["*"],
+          }
+        );
+        if (!locateResult || locateResult.length === 0) return;
+
+        feature = new Graphic({
+          attributes: locateResult.at(0)?.attributes,
+          geometry: locateResult.at(0)?.location,
         });
-      } else {
-        const match = etjResults?.features.at(0)?.getAttribute("JURISDICTION");
-        if (match === "CARY") {
+      }
+      if (!feature) return;
+
+      const etjCount = await etjLayer.current?.queryFeatureCount({
+        where: "JURISDICTION = 'RALEIGH'",
+        geometry: searchPoint,
+      });
+      if (etjCount) {
+        setInEtj(etjCount > 0);
+      }
+
+      if (etjCount === 0) {
+        const etjResults = await etjLayer.current?.queryFeatures({
+          where: "1=1",
+          geometry: searchPoint,
+          outFields: ["JURISDICTION"],
+          returnGeometry: false,
+        });
+        if (etjResults && etjResults.features.length === 0) {
           setJurisdictionLink({
-            name: "Cary",
-            href: "https://www.carync.gov/home/showpublisheddocument/1400/638102363336230000",
-          });
-        } else if (match === "KNIGHTDALE") {
-          setJurisdictionLink({
-            name: "Knightdale",
-            href: "https://www.knightdalenc.gov/sites/default/files/uploads/developmentservices/Forms%20or%20Applications/street-name-application_fillable.pdf",
-          });
-        } else if (match === "APEX") {
-          setJurisdictionLink({
-            name: "Apex",
-            href: "https://www.knightdalenc.gov/sites/default/files/uploads/developmentservices/Forms%20or%20Applications/street-name-application_fillable.pdf",
-          });
-        } else {
-          setJurisdictionLink({
-            name: toTitleCase(match),
+            name: "Wake County",
             href: "https://www.wake.gov/departments-government/geographic-information-services-gis/addresses-road-names-and-street-signs/road-name-approval-guide",
           });
+        } else {
+          const match = etjResults?.features
+            .at(0)
+            ?.getAttribute("JURISDICTION");
+          if (match === "CARY") {
+            setJurisdictionLink({
+              name: "Cary",
+              href: "https://www.carync.gov/home/showpublisheddocument/1400/638102363336230000",
+            });
+          } else if (match === "KNIGHTDALE") {
+            setJurisdictionLink({
+              name: "Knightdale",
+              href: "https://www.knightdalenc.gov/sites/default/files/uploads/developmentservices/Forms%20or%20Applications/street-name-application_fillable.pdf",
+            });
+          } else if (match === "APEX") {
+            setJurisdictionLink({
+              name: "Apex",
+              href: "https://www.knightdalenc.gov/sites/default/files/uploads/developmentservices/Forms%20or%20Applications/street-name-application_fillable.pdf",
+            });
+          } else {
+            setJurisdictionLink({
+              name: toTitleCase(match),
+              href: "https://www.wake.gov/departments-government/geographic-information-services-gis/addresses-road-names-and-street-signs/road-name-approval-guide",
+            });
+          }
         }
+        return;
       }
-      return;
-    }
-    setJurisdictionLink(undefined);
-    if (propertyResult?.features) {
-      setOnProperty(propertyResult.features.length > 0);
-    }
-    if (propertyResult?.features.length === 0) return;
-    
-    const propertyFeature = propertyResult?.features.at(0);
-    if (!propertyFeature) return;
-    if (graphic) {
-      graphic.geometry = searchPoint;
-    }
- 
-    if (feature) {
-      graphic?.setAttribute("zipcode", feature.getAttribute("Postal"));
-      graphic?.setAttribute("address", feature.getAttribute("Match_addr"));
-    }
-    graphic?.setAttribute("pinnum", propertyFeature.getAttribute("PIN_NUM"));
+      setJurisdictionLink(undefined);
+      if (propertyResult?.features) {
+        setOnProperty(propertyResult.features.length > 0);
+      }
+      if (propertyResult?.features.length === 0) return;
 
-    console.log(graphic?.attributes);
+      const propertyFeature = propertyResult?.features.at(0);
+      if (!propertyFeature) return;
+      if (graphic) {
+        graphic.geometry = searchPoint;
+      }
 
-    setGraphic(graphic?.clone());
-  }, [graphic, mapPoint, setGraphic]);
+      if (feature) {
+        graphic?.setAttribute("zipcode", feature.getAttribute("Postal"));
+        graphic?.setAttribute("address", feature.getAttribute("Match_addr"));
+      }
+      graphic?.setAttribute("pinnum", propertyFeature.getAttribute("PIN_NUM"));
+
+      console.log(graphic?.attributes);
+
+      setGraphic(graphic?.clone());
+    },
+    [graphic, mapPoint, setGraphic]
+  );
 
   const layerViewCreated = async (
     event: TargetedEvent<HTMLArcgisMapElement, __esri.ViewLayerviewCreateEvent>
@@ -176,7 +184,7 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
     await propertyLayer.current?.load();
     await etjLayer.current?.load();
     layersLoaded.current = true;
-    
+
     if (graphic?.geometry) {
       checkGeometry(false);
       arcgisMap.current?.goTo({
@@ -184,7 +192,6 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
         zoom: 16,
       });
     }
-
   };
   const mapViewClicked = (
     event: TargetedEvent<HTMLArcgisMapElement, __esri.ViewClickEvent>
@@ -231,9 +238,6 @@ const useLocation = ({ onNext, onValid }: UseLocationOptions) => {
       addPin();
     }
   }, [addPin, checkGeometry, graphic?.geometry]);
-
-
-
 
   useEffect(() => {
     onValid("details", Boolean(inEtj && onProperty && graphic?.geometry));

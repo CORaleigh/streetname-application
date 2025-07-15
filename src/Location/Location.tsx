@@ -32,8 +32,6 @@ const Location: React.FC<LocationProps> = ({
     jurisdictionLink,
   } = useLocation({ onNext, onValid });
 
-  
-
   return (
     <calcite-panel id="location-panel">
       <calcite-notice
@@ -74,7 +72,7 @@ const Location: React.FC<LocationProps> = ({
         onarcgisViewLayerviewCreate={layerViewCreated}
         onarcgisViewClick={mapViewClicked}
         popupDisabled
-        >
+      >
         <arcgis-search
           position="top-left"
           includeDefaultSourcesDisabled

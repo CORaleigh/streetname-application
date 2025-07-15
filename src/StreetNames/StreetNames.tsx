@@ -106,10 +106,10 @@ const StreetNames: React.FC<StreetNamesProps> = ({
                           validationIcon="exclamation-mark-circle-f"
                           oncalciteInputTextInput={(
                             e: TargetedEvent<HTMLCalciteInputTextElement, void>
-                          ) => handleStreetNameInput(e.target, street, i)}
+                          ) => handleStreetNameInput(e.target, i)}
                           oncalciteInputTextChange={(
                             e: TargetedEvent<HTMLCalciteInputTextElement, void>
-                          ) => handleStreetNameCommit(e.target, street, i)}
+                          ) => handleStreetNameCommit(e.target, i)}
                         ></calcite-input-text>
                         {street.status === "valid" &&
                           street.message.length > 0 && (

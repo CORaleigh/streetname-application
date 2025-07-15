@@ -21,18 +21,15 @@ const getPhoneticWords = (name: string): PhoneticCode[] =>
     .trim()
     .toLowerCase()
     .split(/\s+/)
-    .filter(word => word.length > 2)
+    .filter((word) => word.length > 2)
     .map(getCodes);
 
 const codesMatch = (code1: PhoneticCode, code2: PhoneticCode): boolean =>
-  code1.some(c1 => c1 && code2.includes(c1));
+  code1.some((c1) => c1 && code2.includes(c1));
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, "");
 
-const streetsSoundSimilar = (
-  name1: string,
-  name2: string,
-): SimilarStreet => {
+const streetsSoundSimilar = (name1: string, name2: string): SimilarStreet => {
   const normalized1 = name1.trim().toLowerCase();
   const normalized2 = name2.trim().toLowerCase();
 
@@ -49,10 +46,10 @@ const streetsSoundSimilar = (
   const joined2 = normalize(name2);
 
   const editDistance = levenshtein(joined1, joined2);
-  const normalizedDistance = editDistance / Math.max(joined1.length, joined2.length);
+  const normalizedDistance =
+    editDistance / Math.max(joined1.length, joined2.length);
 
-  // Reject if edit distance too high
-  if (normalizedDistance > 0.35) {
+  if (normalizedDistance > 0.4) {
     return {
       streetname: name2,
       similar: false,
@@ -64,44 +61,40 @@ const streetsSoundSimilar = (
   const words1 = getPhoneticWords(normalized1);
   const words2 = getPhoneticWords(normalized2);
 
-  let phoneticMatch = false;
-  for (const code1 of words1) {
-    for (const code2 of words2) {
+  // First words must match
+  const firstWordMatch = codesMatch(words1[0], words2[0]);
+
+  // Remaining words: loose any-to-any match
+  const remaining1 = words1.slice(1);
+  const remaining2 = words2.slice(1);
+
+  let looseMatch = false;
+  for (const code1 of remaining1) {
+    for (const code2 of remaining2) {
       if (codesMatch(code1, code2)) {
-        phoneticMatch = true;
+        looseMatch = true;
         break;
       }
     }
-    if (phoneticMatch) break;
+    if (looseMatch) break;
   }
 
-  const firstWord1Str = normalized1.split(/\s+/)[0];
-  const firstWord2Str = normalized2.split(/\s+/)[0];
-
-  let firstWordsSimilar = false;
-  if (firstWord1Str.length > 2 && firstWord2Str.length > 2) {
-    const firstWord1 = getCodes(firstWord1Str);
-    const firstWord2 = getCodes(firstWord2Str);
-    firstWordsSimilar = codesMatch(firstWord1, firstWord2);
-  }
-
-  const allowLooserEditDistance = firstWordsSimilar && phoneticMatch;
+  const phoneticMatch = firstWordMatch && (remaining1.length === 0 || looseMatch);
 
   const similar =
-    (firstWordsSimilar && phoneticMatch && normalizedDistance <= 0.25) ||
-    (allowLooserEditDistance && normalizedDistance <= 0.35);
-
-  const matchRatio = phoneticMatch ? 1 : 0;
+    (phoneticMatch && normalizedDistance <= 0.35) ||
+    (firstWordMatch && normalizedDistance <= 0.25); // safety net
 
   return {
     streetname: name2,
     similar,
-    matchRatio,
+    matchRatio: phoneticMatch ? 1 : 0,
     normalizedDistance,
   };
 };
 
-// Worker message handler
+
+// Web worker handler
 self.onmessage = (e) => {
   const { type } = e.data;
 

@@ -38,7 +38,10 @@ const useStatus = ({ streetNameGraphics }: UseStatusOptions) => {
     const needed = requested - approved;
     const maxOrder =
       streetNameGraphics.length > 0
-        ? Math.max(...streetNameGraphics.map((g) => g.getAttribute('streetorder'))) : 0; 
+        ? Math.max(
+            ...streetNameGraphics.map((g) => g.getAttribute("streetorder"))
+          )
+        : 0;
     setStreetNames(
       Array.from({ length: needed }, (_, index) => ({
         streetname: "",
@@ -87,8 +90,6 @@ const useStatus = ({ streetNameGraphics }: UseStatusOptions) => {
   const handleStreetsDialogClose = () => {
     setShowStreetsForm(false);
   };
-
-
 
   return {
     notice,

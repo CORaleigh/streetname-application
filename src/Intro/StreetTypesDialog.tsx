@@ -8,10 +8,19 @@ interface IntroProps {
 
 const StreetTypesDialog: React.FC<IntroProps> = ({ open, onClose }) => {
   return (
-    <calcite-dialog open={open} heading="Street Types" oncalciteDialogClose={onClose} modal>
+    <calcite-dialog
+      open={open}
+      heading="Street Types"
+      oncalciteDialogClose={onClose}
+      modal
+    >
       <calcite-list label={"Street Types"} interactionMode="static">
         {config.streetTypes.map((streetType) => (
-          <calcite-list-item key={streetType.types} label={streetType.types} description={streetType.description}></calcite-list-item>
+          <calcite-list-item
+            key={streetType.types}
+            label={streetType.types}
+            description={streetType.description}
+          ></calcite-list-item>
         ))}
       </calcite-list>
     </calcite-dialog>

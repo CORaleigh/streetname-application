@@ -12,15 +12,14 @@ interface UseSubmitOptions {
   onSuccess: (globalId: string) => void;
 }
 
-
-
 const useSubmit = ({
   layer,
   streetsTable,
 
   onSuccess,
 }: UseSubmitOptions) => {
-  const { graphic, streetNames, attachments, sendEmail } = useStreetNameAppContext();
+  const { graphic, streetNames, attachments, sendEmail } =
+    useStreetNameAppContext();
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -28,7 +27,7 @@ const useSubmit = ({
   const submitApplication = async () => {
     if (!graphic) return;
     setSubmitting((prev) => !prev);
-    graphic.setAttribute('status', 'City Review')
+    graphic.setAttribute("status", "City Review");
 
     const result = await layer.applyEdits({ addFeatures: [graphic] });
     if (result.addFeatureResults.length > 0) {
@@ -42,8 +41,8 @@ const useSubmit = ({
               streetname: streetName.streetname,
               streettype: streetName.streettype,
               applicationid: addedFeature.globalId,
-              status: 'City Review',
-              streetorder: streetName.order
+              status: "City Review",
+              streetorder: streetName.order,
             },
           })
       );

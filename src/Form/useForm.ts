@@ -26,7 +26,6 @@ const useForm = () => {
 
   const [selectedStep, setSelectedStep] = useState<string>("intro");
 
-
   return {
     applicationLayer,
     streetsTable,

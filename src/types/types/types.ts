@@ -1,4 +1,3 @@
-
 export type StreetName = {
   streetname: string;
   streettype: string;
@@ -78,7 +77,7 @@ export type Dialog = {
 export type JurisdictionLink = {
   name: string;
   href: string;
-}
+};
 
 export type SimilarStreet = {
   streetname: string;

@@ -9,7 +9,7 @@ export type StreetNameAppContextType = {
   streetNames: StreetName[];
   setStreetNames: React.Dispatch<React.SetStateAction<StreetName[]>>;
   streetNameGraphics: __esri.Graphic[];
-  setStreetNameGraphics: React.Dispatch<React.SetStateAction<__esri.Graphic[]>>;  
+  setStreetNameGraphics: React.Dispatch<React.SetStateAction<__esri.Graphic[]>>;
   attachments: File[];
   setAttachments: React.Dispatch<React.SetStateAction<File[]>>;
   applicationLayer: FeatureLayer;

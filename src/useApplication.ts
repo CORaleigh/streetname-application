@@ -11,7 +11,7 @@ const useApplication = ({ submittalId }: UseApplicationOptions) => {
     setGraphic,
     applicationLayer,
     streetsTable,
-    setStreetNameGraphics
+    setStreetNameGraphics,
   } = useStreetNameAppContext();
 
   const [graphicLoaded, setGraphicLoaded] = useState<boolean>(false);
@@ -54,7 +54,7 @@ const useApplication = ({ submittalId }: UseApplicationOptions) => {
   const updateStreetName = (streetName: __esri.Graphic) => {
     streetsTable.applyEdits({ updateFeatures: [streetName] });
   };
-  
+
   return {
     updateStreetName,
     applicationLayer,
