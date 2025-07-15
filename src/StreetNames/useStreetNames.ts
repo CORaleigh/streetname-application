@@ -255,7 +255,7 @@ const useStreetNames = ({
       if (similarStreet && similarStreet.similar) {
         return {
           status: "valid",
-          message: `May sound like ${similarStreet?.streetname}, you can still submit it. (ratio: ${similarStreet?.matchRatio}, distance: ${similarStreet?.normalizedDistance})`,
+          message: `May sound like ${similarStreet?.streetname}, you can still submit it, but you may want to consider a different name`,
           nameValid: true,
           typeValid: type !== "",
         } as Validity;
