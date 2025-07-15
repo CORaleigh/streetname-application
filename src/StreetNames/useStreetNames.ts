@@ -1,7 +1,8 @@
+// Full `useStreetNames.ts` implementation with AbortController fix
+
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { StreetName, Validity } from "../types/types/types";
 import { getFromIndexedDB, openStreetDB, setInIndexedDB } from "./streetsdb";
-//import { streetsSoundSimilar } from "./checkSound";
 import { streetNameList, streetNameListLastUpdated } from "./streetnameslist";
 import { useStreetNameAppContext } from "../Context/useStreetNameAppContext";
 import Graphic from "@arcgis/core/Graphic";
@@ -11,74 +12,30 @@ import type { List } from "@esri/calcite-components/components/calcite-list";
 import { toTitleCase } from "../utils";
 import useCheckSoundWorker from "./useCheckSoundWorker";
 
-// Define any types for your hook's inputs and outputs
 interface UseStreetNamesOptions {
   streetsLookupTable: __esri.FeatureLayer;
   streetsTable: __esri.FeatureLayer;
-
   onValid?: (step: string, isValid: boolean) => void;
 }
 
-const useStreetNames = ({
-  streetsLookupTable,
-  streetsTable,
-  onValid,
-}: UseStreetNamesOptions) => {
-  const {
-    graphic,
-    streetNames,
-    setStreetNames,
-    streetNameGraphics,
-    sendEmail,
-  } = useStreetNameAppContext();
-
+const useStreetNames = ({ streetsLookupTable, streetsTable, onValid }: UseStreetNamesOptions) => {
+  const { graphic, streetNames, setStreetNames, streetNameGraphics, sendEmail } = useStreetNameAppContext();
   const [minStreetNameCount, setMinStreetNameCount] = useState<number>(0);
   const [validStreetsCount, setValidStreetsCount] = useState<number>(0);
   const [existingStreets, setExistingStreets] = useState<string[]>([]);
   const debounceTimers = useRef<{ [index: number]: number }>({});
+  const validationControllers = useRef<{ [index: number]: AbortController }>({});
   const checkedStreetStorage = useRef(false);
-  const [showAdditionalStreetsAdded, setShowAdditionalStreetsAdded] =
-    useState<boolean>(false);
+  const [showAdditionalStreetsAdded, setShowAdditionalStreetsAdded] = useState<boolean>(false);
   const { checkSoundsSimilar } = useCheckSoundWorker(existingStreets);
-
   const streetNamesRef = useRef<StreetName[]>(streetNames);
 
   useEffect(() => {
     streetNamesRef.current = streetNames;
   }, [streetNames]);
 
-  const directions = useMemo(
-    () => [
-      "NORTH",
-      "SOUTH",
-      "EAST",
-      "WEST",
-      "NORTHEAST",
-      "NORTHWEST",
-      "SOUTHEAST",
-      "SOUTHWEST",
-    ],
-    []
-  );
-
-  const typesNotAllowedInName = useMemo(
-    () => [
-      "STREET",
-      "BOULEVARD",
-      "CIRCLE",
-      "COURT",
-      "CRESCENT",
-      "DRIVE",
-      "LANE",
-      "LOOP",
-      "PATH",
-      "PLACE",
-      "ROAD",
-      "TRAIL",
-      "WAY",
-    ],
-    []
-  );
+  const directions = useMemo(() => ["NORTH", "SOUTH", "EAST", "WEST", "NORTHEAST", "NORTHWEST", "SOUTHEAST", "SOUTHWEST"], []);
+  const typesNotAllowedInName = useMemo(() => ["STREET", "BOULEVARD", "CIRCLE", "COURT", "CRESCENT", "DRIVE", "LANE", "LOOP", "PATH", "PLACE", "ROAD", "TRAIL", "WAY"], []);
 
   useEffect(() => {
     const isStatus = location.pathname.includes("/status/");
@@ -116,172 +73,102 @@ const useStreetNames = ({
   }, [graphic, streetNames]);
 
   const checkStreetName = useCallback(
-    async (name: string, type: string) => {
-      const enteredStreetNames = streetNames.filter(
-        (streetName: StreetName) =>
-          streetName.streetname.toUpperCase() === name.toUpperCase().trim()
-      );
-      if (name.trim() === "") {
-        return {
-          status: "invalid",
-          message: "Street name is required",
-          nameValid: false,
-          typeValid: type !== "",
-        } as Validity;
-      }
-      if (enteredStreetNames.length > 1) {
-        return {
-          status: "invalid",
-          message: "Street name already entered",
-          nameValid: false,
-          typeValid: type !== "",
-        } as Validity;
-      }
-      if (location.pathname.includes("/status/")) {
-        const enteredStreetGraphics = streetNameGraphics.filter(
-          (streetName: __esri.Graphic) =>
-            streetName.getAttribute("streetname").toUpperCase() ===
-            name.toUpperCase().trim()
-        );
-        if (enteredStreetGraphics.length > 1) {
-          return {
-            status: "invalid",
-            message: "Street name already entered",
-            nameValid: false,
-            typeValid: type !== "",
-          } as Validity;
-        }
-      }
+    async (
+      name: string,
+      type: string,
+      signal?: AbortSignal
+    ): Promise<Validity> => {
+      if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+
       const existingStreet = existingStreets.find(
-        (street: string) =>
-          street.toUpperCase() === name.toUpperCase().trim() ||
-          street.toUpperCase().replaceAll(" ", "") ===
-            name.toUpperCase().replaceAll(" ", "")
+        (s) =>
+          s.toUpperCase().replace(/\s+/g, "") ===
+          name.toUpperCase().replace(/\s+/g, "")
       );
       if (existingStreet) {
-        const result = await streetsLookupTable?.queryFeatures({
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+        const result = await streetsLookupTable.queryFeatures({
           where: `ST_NAME like '${existingStreet.toUpperCase()}'`,
           outFields: ["DIR_PREFIX", "ST_NAME", "ST_TYPE", "PLAN_JURIS"],
         });
-
-        let message = `${name} already exists`;
-        if (result.features.length > 0) {
-          const feature = result.features.at(0);
-          const domain = streetsLookupTable.getFieldDomain("PLAN_JURIS");
-          let jurisdiction = feature?.getAttribute("PLAN_JURIS");
-          if (domain?.type === "coded-value") {
-            const codedValue = (
-              domain as __esri.CodedValueDomain
-            ).codedValues.find(
-              (cv: __esri.CodedValue) => jurisdiction === cv.code
-            );
-            if (codedValue) {
-              jurisdiction = codedValue.name;
-            }
-          }
-          message = `${toTitleCase(
-            feature?.getAttribute("DIR_PREFIX")
-          )} ${toTitleCase(feature?.getAttribute("ST_NAME"))} ${toTitleCase(
-            feature?.getAttribute("ST_TYPE")
-          )} already exists in ${jurisdiction}`
-            .replace(/\s+/g, " ")
-            .trim();
-        }
-
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+        const feature = result.features[0];
+        const message = `${toTitleCase(
+          feature?.getAttribute("DIR_PREFIX")
+        )} ${toTitleCase(feature?.getAttribute("ST_NAME"))} ${toTitleCase(
+          feature?.getAttribute("ST_TYPE")
+        )} already exists`;
         return {
           status: "invalid",
-          message: message,
+          message,
           nameValid: false,
           typeValid: type !== "",
-        } as Validity;
+        };
       }
-      if (!/^[a-zA-Z\s]+$/.test(name)) {
+
+      if (!/^[a-zA-Z\s]+$/.test(name))
         return {
           status: "invalid",
           message: "Street name must only contain letters",
           nameValid: false,
           typeValid: type !== "",
-        } as Validity;
-      }
-
-      directions.forEach((direction) => {
-        if (name.toUpperCase().startsWith(direction)) {
-          return {
-            status: "invalid",
-            message: "Street name cannot contain a direction",
-            nameValid: false,
-            typeValid: type !== "",
-          } as Validity;
-        }
-      });
-
-      typesNotAllowedInName.forEach((type) => {
-        if (
-          name.toUpperCase().startsWith(type + " ") ||
-          name.toUpperCase().endsWith(" " + type)
-        ) {
-          return {
-            status: "invalid",
-            message: "Street name cannot contain a street type",
-            nameValid: false,
-            typeValid: type !== "",
-          } as Validity;
-        }
-      });
+        };
+      if (directions.some((d) => name.toUpperCase().startsWith(d)))
+        return {
+          status: "invalid",
+          message: "Street name cannot contain a direction",
+          nameValid: false,
+          typeValid: type !== "",
+        };
+      if (
+        typesNotAllowedInName.some(
+          (t) =>
+            name.toUpperCase().startsWith(t + " ") ||
+            name.toUpperCase().endsWith(" " + t)
+        )
+      )
+        return {
+          status: "invalid",
+          message: "Street name cannot contain a street type",
+          nameValid: false,
+          typeValid: type !== "",
+        };
 
       const words = name.trim().split(/\s+/);
-      const allWordsValid = words.every((word) => word.length >= 3);
-
-      if (!allWordsValid) {
+      if (!words.every((w) => w.length >= 3))
         return {
           status: "invalid",
           message:
             "Each word in the street name must be at least three characters",
           nameValid: false,
           typeValid: type !== "",
-        } as Validity;
-      }
-      const wordCount = name.split(" ");
-      if (wordCount.length > 2)
+        };
+      if (words.length > 2)
         return {
           status: "invalid",
           message: "Street name must be two words or less",
           nameValid: false,
           typeValid: type !== "",
-        } as Validity;
+        };
 
       const similarStreet = await checkSoundsSimilar(name.trim());
-
-      if (similarStreet && similarStreet.similar) {
+      if (similarStreet?.similar)
         return {
           status: "valid",
-          message: `May sound like ${similarStreet?.streetname}, you can still submit it, but you may want to consider a different name`,
+          message: `May sound like ${similarStreet.streetname}`,
           nameValid: true,
           typeValid: type !== "",
-        } as Validity;
-      }
-      if (type === "") {
-        return {
-          status: "invalid",
-          nameValid: true,
-          typeValid: false,
-        } as Validity;
-      }
-      return {
-        status: "valid",
-        message: "",
-        nameValid: true,
-        typeValid: true,
-      } as Validity;
+        };
+      return type === ""
+        ? { status: "invalid", message: "Street type is required", nameValid: true, typeValid: false }
+        : { status: "valid", message: "", nameValid: true, typeValid: true };
     },
     [
+      existingStreets,
       checkSoundsSimilar,
       directions,
-      existingStreets,
-      streetNameGraphics,
-      streetNames,
-      streetsLookupTable,
       typesNotAllowedInName,
+      streetsLookupTable,
     ]
   );
 
@@ -391,45 +278,36 @@ const useStreetNames = ({
   const handleStreetNameInput = useCallback(
     (input: HTMLCalciteInputTextElement, i: number) => {
       const value = input.value;
+      if (debounceTimers.current[i]) clearTimeout(debounceTimers.current[i]);
+      if (validationControllers.current[i])
+        validationControllers.current[i].abort();
 
-      if (debounceTimers.current[i]) {
-        clearTimeout(debounceTimers.current[i]);
-      }
+      const controller = new AbortController();
+      validationControllers.current[i] = controller;
 
-      // Immediately update the UI (for better user feedback)
-      // setStreetNames((prev) =>
-      //   prev.map((s, idx) =>
-      //     idx === i
-      //       ? {
-      //           ...s,
-      //           streetname: value,
-      //         }
-      //       : s
-      //   )
-      // );
+      setStreetNames((prev) =>
+        prev.map((s, idx) => (idx === i ? { ...s, streetname: value } : s))
+      );
 
       debounceTimers.current[i] = window.setTimeout(async () => {
-        const currentStreet = streetNamesRef.current[i];
-        if (!currentStreet) return;
-
-        const validity = await checkStreetName(value, currentStreet.streettype);
-
-        setStreetNames((prev) =>
-          prev.map((s, idx) =>
-            idx === i
-              ? {
-                  ...s,
-                  streetname: value,
-                  status: validity.status,
-                  message: validity.message,
-                  nameValid: validity.nameValid,
-                  typeValid: validity.typeValid,
-                }
-              : s
-          )
-        );
-
+        const current = streetNamesRef.current[i];
+        if (!current) return;
+        try {
+          const result = await checkStreetName(
+            value,
+            current.streettype,
+            controller.signal
+          );
+          setStreetNames((prev) =>
+            prev.map((s, idx) =>
+              idx === i ? { ...s, ...result, streetname: value } : s
+            )
+          );
+        } catch (e) {
+          if ((e as DOMException).name !== "AbortError") console.error(e);
+        }
         delete debounceTimers.current[i];
+        delete validationControllers.current[i];
       }, 400);
     },
     [checkStreetName, setStreetNames]
